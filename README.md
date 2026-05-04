@@ -1,7 +1,11 @@
 # PDS2-2026-PF-grupo6
 Integrantes:
-Djulia Kelly de Souza Nascimento
-Joyce Santos Martins
-Thaís Antonella Siani Cardoso
-Kayke de Oliveira Lemes
-Viviane Figueira da Silva
+Djulia Kelly de Souza Nascimento,
+Joyce Santos Martins,
+Thaís Antonella Siani Cardoso,
+Kayke de Oliveira Lemes,
+Viviane Figueira da Silva.
+
+Descrição:
+Graças ao aumento da demanda por leitura e a popularização das compras online, as livrarias precisam de sistemas eficientes para disponibilizar seus catálogos de forma organizada, simples e acessível. Muitos sistemas atuais apresentam dificuldades na busca por livros, organização por categorias e no gerenciamento de estoque, o que pode impactar diretamente a experiência do consumidor.
+Diante disso, este projeto propõe o desenvolvimento de um sistema de e-commerce voltado para a venda de livros, promovendo a acessiblidade a leitura de forma descomplicada, permitindo que os usuários pesquisem títulos, naveguem por categorias, adicionem produtos ao carrinho e realizem compras de forma simples e intuitiva.
