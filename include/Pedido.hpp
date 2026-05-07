@@ -1,52 +1,53 @@
 #ifndef PEDIDO_HPP
 #define PEDIDO_HPP
 #include <string>
-#include "Carrinho.hpp"
-#include "Cliente.hpp"
+class Cliente;
+class Carrinho;
+
 /**
  * @class Pedido
  * @brief Representa o processamento final de uma compra no sistema.
  */
-class Pedido
-{
+class Pedido{
 private:
-std::string status;
-double valorFrete;
-double valorTotal;
+std::string _status;
+double _valorFrete;
+double _valorTotal;
   
 public:
-     /**
-     * @brief Construtor da classe Pedido.
-     * @param carrinho Referência ao carrinho contendo os itens.
-     * @param cliente Referência ao cliente que realizou o pedido.
+     /** 
+     * @brief Este construtor extrai as informacoes de produtos, quantidades e valores 
+     * diretamente do carrinho, associa ao cliente responsavel e define o 
+     * status inicial como "Pendente".
+     * 
+     * @param carrinho Referencia constante para o carrinho contendo os produtos.
+     * O uso de const garante que os dados do carrinho nao sejam alterados na criacao do pedido.
+     * @param cliente Referencia constante para o cliente que esta realizando o pedido.
+     * O uso de const garante a integridade dos dados do cliente durante a inicializacao.
      */
-   
     Pedido(const Carrinho& carrinho, const Cliente& cliente);
-     /**
-     * @brief Destrutor do pedido
-     */
-    ~Pedido(); 
+   
     /**
      * @brief Calcula e informa o valor de frete para o pedido;
      * @param endereco Endereço de entrega
      */
     void informarValorFrete(std::string endereco);
     /**
-     * @brief Estima a data de entrega de acordo com a localização do cliente.
+     * @brief Estima a data de entrega de acordo com a localizacao do cliente.
      * @param endereco Endereço de entrega
      * @return String com a data ou prazo estimado.
      */
     std::string estimarDataEntrega(std::string endereco);
     /**
-    * @brief Processa pagamento via Pix, cartão de crédito ou débito.
-    * @param metodo string indicando o método de pagamento escolhido (Pix, crédito, débito
+    * @brief Processa pagamento via Pix, cartao de credito ou debito.
+    * @param metodo string indicando o metodo de pagamento escolhido (Pix, crédito, débito)
     */
     void processarPagamentos(std::string metodo);
 
     /**
      * @brief Gera o resumo de faturamento, calcula o valor total.
      * @param cliente Cliente do pedido
-     * @param carrinho Carrinho com os produtos para somatória de valores.
+     * @param carrinho Carrinho com os produtos para somatoria de valores.
      */
     void gerarResumoFaturamento(const Cliente& cliente, const Carrinho& carrinho);
 
@@ -57,19 +58,21 @@ public:
     void gerenciarStatus(std::string novoStatus);
 
     /**
-     * @brief Exibe mensagem de confirção de pagamento.
+     * @brief Exibe mensagem de confirmacao de pagamento.
      */
     void exibirMensagemConfirmacao();
 
      /**
-     * @brief Retorna o status do pedido
+     * @brief Retorna o status do pedido. O metodo é const para garantir que a consulta ao status nao modifique nenhum atributo da classe.
+     * @return String contendo o status.
      */
-    std::string getStatus()const {return status;}
+    std::string getStatus()const {return _status;}
 
       /**
-     * @brief Retorna o valor total do pedido
+     * @brief Retorna o valor total do pedido. O uso de const assegura que este metodo funcione apenas como um seletor (getter), sem risco de alterar o valor do pedido.
+     * @return Double contendo o valor total (produtos + frete).
      */
-    double getvalorTotal() const {return valorTotal;}
+    double getvalorTotal() const {return _valorTotal;}
 
 
 };
