@@ -2,13 +2,12 @@
 #define PRODUTO_HPP
 
 #include <string>
-class estoque;
 
 /**
- * @brief Armazena e fornece as informações de um livro.
+ * @brief Classe armazena e fornece as informações de um livro.
  */
 
-class produto {
+class Produto {
 
 private:
 
@@ -16,36 +15,41 @@ private:
     std::string _nome;
     std::string _descricao;
     float _preco;
-    int quantidadeEstoque;
+    int _quantidadeEstoque;
 
 public:
 
-    produto(int id, std::string nome, std::string descricao, float preco, int quantidadeEstoque);
+    Produto(int id, std::string nome, std::string descricao, float preco, int quantidadeEstoque);
 
 /**
-* @brief Retorna o identificador único do livro. 
+* @brief Retorna o identificador único do livro.
+* O método é const para garantir que a consulta não altere o ID do produto.
 */
-    int getId();
+    int getId() const;
 
 /**
 * @brief Retorna o nome do livro.
+* Este método é const para garantir que a consulta não altere o nome do produto.
 */
-    std::string getNome();
+    std::string getNome() const;
 
 /**
  * @brief Retorna a descrição do livro.
+ * Este método é const para garantir que a consulta não altere a descrição do produto.
  */
-    std::string getDescricao();
+    std::string getDescricao() const;
 
 /**
 * @brief Retorna o preço do livro.
+* Este método é const para garantir que a consulta não altere o valor do produto.
 */
-    float getPreco();
+    float getPreco() const;
 
 /**
-* @brief Retorna a quantidade atual de produtos em estoque.
+* @brief Retorna a quantidade atual de unidades do produto em estoque.
+* Este método é const para garantir que a consulta não altere a contagem de unidades.
 */
-    int getQuantidadeEstoque();
+    int getQuantidadeEstoque() const;
 };
 
 #endif
