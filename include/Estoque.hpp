@@ -11,7 +11,7 @@
  */
 class Estoque {
 private:
-    std::vector<Produto> inventario;
+    std::vector<Produto> _inventario;
 
 public:
     /**
