@@ -12,10 +12,10 @@ class produto {
 
 private:
 
-    int id;
-    std::string nome;
-    std::string descricao;
-    float preco;
+    int _id;
+    std::string _nome;
+    std::string _descricao;
+    float _preco;
     int quantidadeEstoque;
 
 public:
