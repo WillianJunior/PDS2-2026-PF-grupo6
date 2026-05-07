@@ -1,9 +1,8 @@
 #ifndef CARRINHO_HPP
 #define CARRINHO_HPP
+#include "Produto.hpp"
+#include "Cliente.hpp"
 #include <vector>
-
-class Produto;
-class Cliente;
 
 /**  
  * @class Carrinho 
