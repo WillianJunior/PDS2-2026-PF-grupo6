@@ -64,12 +64,12 @@ public:
      /**
      * @brief Retorna o status do pedido
      */
-    std::string getStatus()const {return status};
+    std::string getStatus()const {return status;}
 
       /**
      * @brief Retorna o valor total do pedido
      */
-    double getvalorTotal() const {return valorTotal};
+    double getvalorTotal() const {return valorTotal;}
 
 
 };
