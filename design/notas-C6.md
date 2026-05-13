@@ -1,0 +1,5 @@
+ - Gostei dos diagramas de classes.
+ - Vi muitas referências (&) mas poucos consts. Só confirmando se todos esses objetos serão alteráveis.
+ - Em Pedido::processarPagamentos(string metodo), não é muito legal usar strings para dados categóricos. Vocês sabem a priori quais são os possíveis métodos de pagamento. Melhor passar um enum disso.
+ - Tem muita coisa modelada do ponto de vista de negócio, o que é bom. Porém, não notei muita coisa sobre como isso será impresso na tela.
+ - Bem legal a motivação do README.
