@@ -9,9 +9,22 @@ class Carrinho;
  * @brief Representa o processamento final de uma compra no sistema.
  */
 class Pedido{
+  public:
+  enum class MetodoPagamento {
+    Pix,
+    Credito,
+    Debito
+  };
+    public:
+  enum class StatusPedido {
+    Pendente,
+    Pago,
+    Enviado,
+    Entregue
+  };
 private:
-std::string _status;
-double _valorFrete;
+StatusPedido _status;
+double _frete;
 double _valorTotal;
   
 public:
@@ -29,20 +42,20 @@ public:
    
     /**
      * @brief Calcula e informa o valor de frete para o pedido;
-     * @param endereco Endereço de entrega
+     * @param endereco Endereco de entrega
      */
     void informarValorFrete(std::string endereco);
     /**
      * @brief Estima a data de entrega de acordo com a localizacao do cliente.
-     * @param endereco Endereço de entrega
+     * @param endereco Endereco de entrega
      * @return String com a data ou prazo estimado.
      */
     std::string estimarDataEntrega(std::string endereco);
     /**
     * @brief Processa pagamento via Pix, cartao de credito ou debito.
-    * @param metodo string indicando o metodo de pagamento escolhido (Pix, crédito, débito)
+    * @param metodo metodo enum indicando o metodo de pagamento escolhido (Pix, crédito, débito)
     */
-    void processarPagamentos(std::string metodo);
+    void processarPagamentos(MetodoPagamento metodo);
 
     /**
      * @brief Gera o resumo de faturamento, calcula o valor total.
@@ -55,7 +68,7 @@ public:
      * @brief Gerencia o fluxo de mudança do status do pedido(Pendente, pago, enviado e entregue).
      * @param novoStatus O novo estado do pedido.
      */
-    void gerenciarStatus(std::string novoStatus);
+    void gerenciarStatus(StatusPedido novoStatus);
 
     /**
      * @brief Exibe mensagem de confirmacao de pagamento.
@@ -66,7 +79,7 @@ public:
      * @brief Retorna o status do pedido. O metodo é const para garantir que a consulta ao status nao modifique nenhum atributo da classe.
      * @return String contendo o status.
      */
-    std::string getStatus()const {return _status;}
+    StatusPedido getStatus()const {return _status;}
 
       /**
      * @brief Retorna o valor total do pedido. O uso de const assegura que este metodo funcione apenas como um seletor (getter), sem risco de alterar o valor do pedido.
