@@ -26,7 +26,7 @@ TEST_FILES = \
 
 test:
 	$(CXX) $(CXXFLAGS) $(SRC_FILES) $(TEST_FILES) -o $(TEST_APP)
-	./$(TEST_APP)
+	./$(TEST_APP) > test/test.txt	
 	gcovr -r . --html --html-details -o coverage.html
 
 clean:
@@ -34,6 +34,7 @@ clean:
 	rm -f *.gcda
 	rm -f *.gcno
 	rm -f coverage.html
+	rm -f test/test.txt
 
 
 
