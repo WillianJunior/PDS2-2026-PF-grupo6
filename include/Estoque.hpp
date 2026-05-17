@@ -62,7 +62,6 @@ public:
      * @return true se a operação é segura e permitida pelo estoque atual.
      */
     bool impedirVendasAcimaMaximo(int idProduto, int quantidadeDesejada) const;
-    void abastecerEstoque(int idProduto, int quantidadeAdicional);
 };
 
 #endif // ESTOQUE_HPP
