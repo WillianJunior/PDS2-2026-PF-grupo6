@@ -4,8 +4,7 @@
 #include "Cliente.hpp"
 #include <vector>
 
-/**  
- * @class Carrinho 
+/** * @class Carrinho 
  * @brief Representa o carrinho ativo de um cliente durante a navegação do e - commerce.
  */
 
@@ -17,8 +16,7 @@ class Carrinho {
     double _valorFrete; 
     
     public:
-    /** 
-     * @brief Cria um carrinho associado a um cliente específico.
+    /** * @brief Cria um carrinho associado a um cliente específico.
      */
     Carrinho(Cliente& cliente);
 
@@ -29,15 +27,13 @@ class Carrinho {
      */
     int buscarIdProduto(int idProduto) const;
 
-    /** 
-     * @brief Adiciona um produto ao carrinho ou incrementa a sua quantidade.
+    /** * @brief Adiciona um produto ao carrinho ou incrementa a sua quantidade.
      * @param produto produto a ser adicionado.
      * @param quantidade Quantidade do produto a ser adicionada.
      */
     void adicionarProduto(const Produto& produto, int quantidade);
 
-    /** 
-     * @brief Remove um produto do carrinho.
+    /** * @brief Remove um produto do carrinho.
      * @param idProduto ID do produto a ser removido.
      */
     void removerProduto(int idProduto);
@@ -55,43 +51,36 @@ class Carrinho {
      * @param quantidade Quantidade do produto a ser verificada.
      * @return Retorna true se todos os produtos estiverem disponíveis, false caso contrário.
      */
-    bool validarEstoque(const Produto& produto, int quantidade);
+    bool validarEstoque(const Produto& produto, int quantidade) const;
     
-    /** 
-     * @brief Esvazia o carrinho, removendo todos os produtos e resetando o valor total da compra.
+    /** * @brief Esvazia o carrinho, removendo todos os produtos e resetando o valor total da compra.
      */
     void limparCarrinho();
     
-    /** 
-     * @brief Calcula o subtotal dos produtos do carrinho.
+    /** * @brief Calcula o subtotal dos produtos do carrinho.
      * @return Retorna o valor do subtotal dos produtos no carrinho.
      */
     double calcularSubtotal() const;
 
-    /** 
-     * @brief Calcula o valor total da compra, incluindo o subtotal dos produtos e o valor do frete.
+    /** * @brief Calcula o valor total da compra, incluindo o subtotal dos produtos e o valor do frete.
      * @return Retorna o valor total da compra.
      */
     double calcularTotal() const;
 
-    /** 
-     * @brief Calcula o valor do frete com base na localização do cliente.
+    /** * @brief Calcula o valor do frete com base na localização do cliente.
      * @return Retorna o valor do frete para a compra.
      */
     double calcularValorFrete() const;
 
-    /** 
-     * @brief Obtém o valor do frete para a compra.
+    /** * @brief Obtém o valor do frete para a compra.
      */
     double getValorFrete() const;
       
-    /** 
-    * @brief Fornece acesso, somente para leitura, à lista de produtos no carrinho.
+    /** * @brief Fornece acesso, somente para leitura, à lista de produtos no carrinho.
     */
     const std::vector<Produto>& getProdutos() const;
 
-    /** 
-    * @brief Fornece acesso, somente para leitura, à lista de quantidades dos produtos no carrinho.
+    /** * @brief Fornece acesso, somente para leitura, à lista de quantidades dos produtos no carrinho.
     */
     const std::vector<int>& getQuantidades() const;
 
