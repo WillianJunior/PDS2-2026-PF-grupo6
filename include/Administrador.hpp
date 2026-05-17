@@ -1,7 +1,7 @@
 #ifndef ADMINISTRADOR_HPP
 #define ADMINISTRADOR_HPP
 
-#include "Usuario.hpp" // Obrigatório por causa da herança
+#include "Usuario.hpp" 
 #include <string>
 
 class Catalogo;
@@ -15,22 +15,24 @@ class Pedido;
  */
 class Administrador : public Usuario {
 public:
-    Administrador(std::string nome, std::string email, std::string senha);
+
+    Administrador(const std::string& nome, const std::string& email, const std::string& senha);
 
     /**
      * @brief Cadastra ou remove itens da vitrine da loja.
      * @param catalogo Referência direta ao catálogo ativo no sistema.
      */
-    void gerenciarCatalogo(Catalogo& catalogo);
+    
+    void gerenciarCatalogo(Catalogo& catalogo) const;
 
     /**
      * @brief Modifica quantidades de itens no armazém.
      * @param estoque Referência direta ao controle de inventário.
      */
-    void gerenciarEstoque(Estoque& estoque);
+    void gerenciarEstoque(Estoque& estoque) const;
 
-    void gerenciarContas(Cliente& cliente);
-    void atualizarVendas(Pedido& pedido);
+    void gerenciarContas(Cliente& cliente) const;
+    void atualizarVendas(Pedido& pedido) const;
 };
 
 #endif // ADMINISTRADOR_HPP

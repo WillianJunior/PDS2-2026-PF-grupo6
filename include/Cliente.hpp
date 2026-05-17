@@ -1,9 +1,19 @@
 #ifndef CLIENTE_HPP
 #define CLIENTE_HPP
 
-#include "Usuario.hpp" // Obrigatório usar include aqui por causa da herança (extends)
+#include "Usuario.hpp"
 #include <string>
 #include <vector>
+
+/**
+ * @brief Opções válidas para transações financeiras.
+ * O enum evita erros de digitação e substitui o uso de strings.
+ */
+enum FormaPagamento {
+    PIX,
+    CARTAO_CREDITO,
+    BOLETO
+};
 
 /**
  * @brief Representa um consumidor na loja.
@@ -13,10 +23,12 @@ class Cliente : public Usuario {
 private:
     std::string _cpf;
     std::vector<std::string> _enderecos;
-    std::vector<std::string> _metodosPagamento;
+    
+    std::vector<FormaPagamento> _metodosPagamento;
 
 public:
-    Cliente(std::string nome, std::string email, std::string senha, std::string cpf);
+
+    Cliente(const std::string& nome, const std::string& email, const std::string& senha, const std::string& cpf);
 
     /**
      * @brief Valida as condições matemáticas do CPF fornecido.
@@ -24,8 +36,9 @@ public:
      */
     bool validarCpf() const;
 
-    void adicionarEndereco(std::string novoEndereco);
-    void adicionarMetodoPagamento(std::string novoMetodo);
+    void adicionarEndereco(const std::string& novoEndereco);
+    
+    void adicionarMetodoPagamento(FormaPagamento novoMetodo);
 };
 
 #endif // CLIENTE_HPP
