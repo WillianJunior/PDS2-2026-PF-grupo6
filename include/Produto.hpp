@@ -4,17 +4,6 @@
 #include <string>
 
 /**
- * @brief Categorias disponíveis na loja.
- * Colocado o enum aqui para que o Produto já nasça com uma categoria definida!
- */
-enum CategoriaProduto {
-    LIVROS,
-    ELETRONICOS,
-    ROUPAS,
-    ALIMENTOS
-};
-
-/**
  * @brief Classe armazena e fornece as informações de um produto do e-commerce.
  */
 class Produto {
@@ -25,11 +14,10 @@ private:
     std::string _descricao;
     float _preco;
     int _quantidadeEstoque;
-    CategoriaProduto _categoria;
 
 public:
 
-    Produto(int id, const std::string& nome, const std::string& descricao, float preco, int quantidadeEstoque, CategoriaProduto categoria);
+    Produto(int id, const std::string& nome, const std::string& descricao, float preco, int quantidadeEstoque);
 
     /**
      * @brief Retorna o identificador único do produto.
@@ -61,10 +49,6 @@ public:
      */
     int getQuantidadeEstoque() const;
 
-    /**
-     * @brief Retorna a categoria à qual este produto pertence.
-     */
-    CategoriaProduto getCategoria() const;
 };
 
 #endif
