@@ -5,17 +5,6 @@
 #include <vector>
 #include <string>
 
-/**
- * @brief Categorias disponíveis na loja.
- * Substitui o uso de 'char' ou 'string' para evitar erros
- */
-enum CategoriaProduto {
-    LIVROS,
-    ELETRONICOS,
-    ROUPAS,
-    ALIMENTOS
-};
-
 class Catalogo {
 
 private:
@@ -55,6 +44,18 @@ public:
      * @param idProduto Identificação do produto a ser removido.
      */
     void removerProduto(int idProduto);
+
+    /**
+     * @brief Estrutura fictícia representando um pedido realizado.
+     */
+    struct Pedido {
+
+        int idPedido;
+        std::string nomeCliente;
+        std::string enderecoEntrega;
+        double valorTotal;
+        bool pagamentoAprovado;
+    };
 };
 
 #endif
