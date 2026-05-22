@@ -28,7 +28,7 @@ public:
 
     bool vazio() const;
     int getQuantidadeItens() const;
-    double getValorFrete
+    double getValorFrete() const;
 };
 
 #endif
