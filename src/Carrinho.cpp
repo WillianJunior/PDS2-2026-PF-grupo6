@@ -87,6 +87,10 @@ int Carrinho::getQuantidadeItens() const {
     return _produtos.size();
 }
 
+double Carrinho::getValorFrete() const { 
+    return calcularValorFrete(); 
+}
+
 
 
 
