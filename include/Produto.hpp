@@ -3,6 +3,8 @@
 
 #include <string>
 
+enum class CategoriaProduto { Ficcao, Tecnico, Infantil, Romance };
+
 /**
  * @brief Classe armazena e fornece as informações de um produto do e-commerce.
  */
