@@ -37,6 +37,9 @@ public:
     void atualizarDadosPerfil();
     void gerenciarRecuperacaoAcesso();
     bool permitirAlteracaoDados() const;
+    const std::string& getNome() const;
+    const std::string& getEmail() const;
+    const std::string& getSenha() const;
 };
 
-#endif // USUARIO_HPP
+#endif
