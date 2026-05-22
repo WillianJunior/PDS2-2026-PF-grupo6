@@ -6,13 +6,13 @@
 #include <string>
 
 class Catalogo {
-
+    
 private:
     std::vector<Produto> produtos_;
 
 public:
 
-    /** * @brief O catálogo exibe os produtos que são vendidos pelo e-commerce.
+ /** * @brief O catálogo exibe os produtos que são vendidos pelo e-commerce.
      */
     Catalogo();
 
@@ -35,12 +35,13 @@ public:
      * @param idProduto Identificação do produto.
      */
     void exibirDescricao(int idProduto) const;
-    
+
     /** * @brief Adiciona um produto ao catálogo.
      * @param produto Produto a ser adicionado.
      */
     void adicionarProduto(const Produto& produto);
-    /** * @brief Remove um produto do catálogo.
+
+     /** * @brief Remove um produto do catálogo.
      * @param idProduto Identificação do produto a ser removido.
      */
     void removerProduto(int idProduto);
@@ -48,8 +49,7 @@ public:
     /**
      * @brief Estrutura fictícia representando um pedido realizado.
      */
-    struct Pedido {
-
+    struct ResumoPedido {
         int idPedido;
         std::string nomeCliente;
         std::string enderecoEntrega;
