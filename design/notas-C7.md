@@ -1,0 +1,2 @@
+ - muitos prints. a ideia seria apenas um módulo/classe ser responsável por mandar prints. fica mais coeso
+ - cout << "não implementado" => isso não é legal. ou lançar exceções (ainda não aprendemos) ou deixar vazio msm. afinal, vocês tem os testes mostrando que a implementação está incorreta :)
