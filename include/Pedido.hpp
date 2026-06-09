@@ -44,13 +44,13 @@ public:
      * @brief Calcula e informa o valor de frete para o pedido;
      * @param endereco Endereco de entrega
      */
-    void informarValorFrete(std::string endereco);
+   void informarValorFrete(const std::string& endereco);
     /**
      * @brief Estima a data de entrega de acordo com a localizacao do cliente.
      * @param endereco Endereco de entrega
      * @return String com a data ou prazo estimado.
      */
-    std::string estimarDataEntrega(std::string endereco);
+    std::string estimarDataEntrega(const std::string& endereco);
     /**
     * @brief Processa pagamento via Pix, cartao de credito ou debito.
     * @param metodo metodo enum indicando o metodo de pagamento escolhido (Pix, crédito, débito)
@@ -85,7 +85,9 @@ public:
      * @brief Retorna o valor total do pedido. O uso de const assegura que este metodo funcione apenas como um seletor (getter), sem risco de alterar o valor do pedido.
      * @return Double contendo o valor total (produtos + frete).
      */
-    double getvalorTotal() const {return _valorTotal;}
+    double getValorTotal() const {return _valorTotal;}
+    void salvarEmArquivo(const Cliente& cliente);
+    double getValorFrete() const { return _frete;}
 
 
 };
