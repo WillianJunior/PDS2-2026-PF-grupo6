@@ -1,21 +1,56 @@
 #include "Administrador.hpp"
-#include <iostream>
 
-Administrador::Administrador(std::string nome, std::string email, std::string senha)
-    : Usuario(nome, email, senha) {}
+Administrador::Administrador(
+        std::string nome,
+        std::string email,
+        std::string senha,
+        std::string respostaSeguranca)
 
-void Administrador::gerenciarCatalogo(Catalogo&) {
-    std::cout << "Administrador gerenciando catálogo\n";
+    : Usuario(nome,
+              email,
+              senha,
+              "admin",
+              respostaSeguranca) {
 }
 
-void Administrador::gerenciarEstoque(Estoque&) {
-    std::cout << "Administrador gerenciando estoque\n";
+void Administrador::gerenciarCatalogo(
+        Catalogo&) {
 }
 
-void Administrador::gerenciarContas(Cliente&) {
-    std::cout << "Administrador gerenciando clientes\n";
+void Administrador::gerenciarEstoque(
+        Estoque&) {
 }
 
-void Administrador::atualizarVendas(Pedido&) {
-    std::cout << "Administrador atualizando pedidos\n";
+void Administrador::gerenciarContas(
+        Cliente&) {
+}
+
+void Administrador::atualizarVendas(
+        Pedido&) {
+}
+
+bool Administrador::cadastrarAdministrador(
+        const std::string& nomeArquivo) const {
+
+    if (!validarEmail(_email)) {
+        return false;
+    }
+
+    if (!gerenciarSenha(_senha)) {
+        return false;
+    }
+
+    if (_respostaSeguranca.empty()) {
+        return false;
+    }
+
+    return Usuario::salvarUsuario(
+        "admin",
+        _nome,
+        _email,
+        _senha,
+        "",
+        _respostaSeguranca,
+        nomeArquivo
+    );
 }

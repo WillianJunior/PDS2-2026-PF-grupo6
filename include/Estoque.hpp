@@ -2,6 +2,7 @@
 #define ESTOQUE_HPP
 
 #include "Produto.hpp"
+#include <string>
 #include <vector>
 
 /**
@@ -22,18 +23,16 @@ public:
     Estoque();
 
     /**
-     * @brief Apresenta o balanço total de itens no armazém.
-     * O método é const pois serve apenas para leitura e exibição de dados 
-     * na interface do administrador, sem alterar as quantidades salvas.
+     * @brief Retorna o balanço total de itens no armazém como texto.
+     * A exibição fica a cargo da classe de interface.
      */
-    void exibirQuantidadeDisponiveis() const;
+    std::string exibirQuantidadeDisponiveis() const;
 
     /**
-     * @brief Monitora produtos com baixo volume de unidades.
-     * Esta função percorre o inventário e identifica itens abaixo do limite
-     * de segurança para evitar que a loja fique sem estoque. É const por ser uma busca de leitura.
+     * @brief Retorna alertas de produtos com baixo volume de unidades.
+     * A exibição fica a cargo da classe de interface.
      */
-    void alertarEstoqueCritico() const;
+    std::string alertarEstoqueCritico() const;
 
     /**
      * @brief Reserva temporariamente itens para um pedido em andamento.
@@ -55,8 +54,6 @@ public:
 
     /**
      * @brief Bloqueia tentativas de compra que excedam o estoque real.
-     * O método é const para realizar a validação de segurança de forma 
-     * isolada, protegendo os dados contra alterações acidentais durante a checagem.
      * @param idProduto Identificador do produto alvo.
      * @param quantidadeDesejada Volume que o cliente tenta adicionar ao carrinho.
      * @return true se a operação é segura e permitida pelo estoque atual.
