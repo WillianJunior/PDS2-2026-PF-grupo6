@@ -3,43 +3,64 @@
 
 #include <string>
 
-/**
- * @brief Entidade base do sistema para identificação e controle de acesso.
- * Centraliza as regras de segurança da conta compartilhadas por clientes e administradores.
- */
 class Usuario {
 protected:
-    /**
-    * @brief Usamos protected para que Cliente e Administrador consigam herdar e acessar essas variáveis
-    */
     std::string _nome;
     std::string _email;
     std::string _senha;
+    std::string _tipo;
+    std::string _respostaSeguranca;
 
 public:
-    /**
-     * @brief Inicializa as credenciais básicas do usuário na memória.
-     */
-    Usuario(std::string nome, std::string email, std::string senha);
+    Usuario(std::string nome,
+            std::string email,
+            std::string senha,
+            std::string tipo,
+            std::string respostaSeguranca);
 
-    /**
-     * @brief Verifica a integridade do e-mail (ex: presença de '@').
-     * É const pois não altera o usuário, apenas faz uma checagem de leitura.
-     */
     bool validarEmail(std::string novoEmail) const;
-
-    /**
-     * @brief Avalia se a senha atinge a política de segurança do E-commerce.
-     */
     bool gerenciarSenha(std::string novaSenha) const;
-    
+
     void armazenarNome(std::string novoNome);
+
     void atualizarDadosPerfil();
-    void gerenciarRecuperacaoAcesso();
+
     bool permitirAlteracaoDados() const;
+
     const std::string& getNome() const;
     const std::string& getEmail() const;
     const std::string& getSenha() const;
+    const std::string& getTipo() const;
+    const std::string& getRespostaSeguranca() const;
+
+    bool autenticar(std::string email,
+                    std::string senha) const;
+
+    static std::string getPerguntaSeguranca();
+
+    static bool emailJaCadastrado(
+        const std::string& email,
+        const std::string& nomeArquivo = "usuarios.txt");
+
+    static std::string fazerLogin(
+        const std::string& email,
+        const std::string& senha,
+        const std::string& nomeArquivo = "usuarios.txt");
+
+    static bool salvarUsuario(
+        const std::string& tipo,
+        const std::string& nome,
+        const std::string& email,
+        const std::string& senha,
+        const std::string& cpf,
+        const std::string& respostaSeguranca,
+        const std::string& nomeArquivo = "usuarios.txt");
+
+    static bool recuperarSenha(
+        const std::string& email,
+        const std::string& respostaSeguranca,
+        const std::string& novaSenha,
+        const std::string& nomeArquivo = "usuarios.txt");
 };
 
 #endif
