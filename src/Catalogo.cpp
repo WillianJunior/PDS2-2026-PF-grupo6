@@ -1,62 +1,248 @@
-// Catalogo.cpp
-
 #include "Catalogo.hpp"
+
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 Catalogo::Catalogo() {}
 
 /**
- * @brief Lista produtos da categoria selecionada.
+ * Adiciona um novo produto ao arquivo do catálogo.
  */
-void Catalogo::listarProdutosCategoria(CategoriaProduto categoria) const {
+void Catalogo::adicionarProaduto(
+        const Produto& produto) {
 
-    std::cout << "Funcionalidade ainda nao implementada."
-              << std::endl;
+    std::ofstream arquivo(
+        "catalogo.txt",
+        std::ios::app);
+
+    arquivo << produto.getId() << ";"
+            << produto.getNome() << ";"
+            << produto.getDescricao() << ";"
+            << produto.getPreco() << ";"
+            << "Ficcao"
+            << "\n";
 }
 
 /**
- * @brief Busca produtos usando palavra-chave.
+ * Remove um produto a partir do ID informado.
  */
-void Catalogo::buscarItem(const std::string& palavraChave) const {
+void Catalogo::removerProduto(
+        int idProduto) {
 
-    std::cout << "Busca ainda nao implementada."
-              << std::endl;
+    std::ifstream entrada("catalogo.txt");
+
+    std::vector<std::string> linhas;
+
+    std::string linha;
+
+    // Copia apenas as linhas que não possuem o ID removido
+    while (std::getline(entrada, linha)) {
+
+        std::stringstream ss(linha);
+
+        std::string idTexto;
+
+        std::getline(ss, idTexto, ';');
+
+        if (std::stoi(idTexto) != idProduto) {
+            linhas.push_back(linha);
+        }
+    }
+
+    entrada.close();
+
+    std::ofstream saida("catalogo.txt");
+
+    for (const auto& l : linhas) {
+        saida << l << "\n";
+    }
 }
 
 /**
- * @brief Ordena produtos pelo preco.
+ * Busca livros contendo a palavra-chave informada.
  */
-void Catalogo::ordenarPreco(bool crescente) {
+void Catalogo::buscarItem(
+        const std::string& palavraChave) const {
 
-    std::cout << "Ordenacao ainda nao implementada."
-              << std::endl;
+    std::ifstream arquivo("catalogo.txt");
+
+    std::string linha;
+
+    while (std::getline(arquivo, linha)) {
+
+        if (linha.find(palavraChave)
+            != std::string::npos) {
+
+            std::cout << linha << std::endl;
+        }
+    }
 }
 
 /**
- * @brief Exibe descricao de um produto.
+ * Lista apenas os livros pertencentes à categoria escolhida.
  */
-void Catalogo::exibirDescricao(int idProduto) const {
+void Catalogo::listarProdutosCategoria(
+        CategoriaProduto categoria) const {
 
-    std::cout << "Descricao ainda nao implementada."
-              << std::endl;
+    std::string categoriaTexto;
+
+    switch (categoria) {
+
+        case CategoriaProduto::Ficcao:
+            categoriaTexto = "Ficcao";
+            break;
+
+        case CategoriaProduto::Tecnico:
+            categoriaTexto = "Tecnico";
+            break;
+
+        case CategoriaProduto::Infantil:
+            categoriaTexto = "Infantil";
+            break;
+
+        case CategoriaProduto::Romance:
+            categoriaTexto = "Romance";
+            break;
+    }
+
+    std::ifstream arquivo("catalogo.txt");
+
+    std::string linha;
+
+    while (std::getline(arquivo, linha)) {
+
+        if (linha.find(categoriaTexto)
+            != std::string::npos) {
+
+            std::cout << linha << std::endl;
+        }
+    }
 }
 
 /**
- * @brief Adiciona produto ao catalogo.
+ * Ordena os livros por preço utilizando Bubble Sort.
  */
-void Catalogo::adicionarProduto(const Produto& produto) {
+void Catalogo::ordenarPreco(
+        bool crescente) {
 
-    produtos_.push_back(produto);
+    struct Livro {
 
-    std::cout << "Produto adicionado."
-              << std::endl;
+        int id;
+        std::string nome;
+        std::string descricao;
+        float preco;
+        std::string categoria;
+    };
+
+    std::vector<Livro> livros;
+
+    std::ifstream arquivo("catalogo.txt");
+
+    std::string linha;
+
+    // Carrega os livros do arquivo para memória
+    while (std::getline(arquivo, linha)) {
+
+        Livro livro;
+
+        std::stringstream ss(linha);
+
+        std::string precoTexto;
+        std::string idTexto;
+
+        std::getline(ss, idTexto, ';');
+        std::getline(ss, livro.nome, ';');
+        std::getline(ss, livro.descricao, ';');
+        std::getline(ss, precoTexto, ';');
+        std::getline(ss, livro.categoria);
+
+        livro.id = std::stoi(idTexto);
+        livro.preco = std::stof(precoTexto);
+
+        livros.push_back(livro);
+    }
+
+    // Algoritmo Bubble Sort
+    for (size_t i = 0; i < livros.size(); i++) {
+
+        for (size_t j = 0;
+             j < livros.size() - 1;
+             j++) {
+
+            bool troca;
+
+            if (crescente) {
+
+                troca =
+                    livros[j].preco >
+                    livros[j + 1].preco;
+            }
+
+            else {
+
+                troca =
+                    livros[j].preco <
+                    livros[j + 1].preco;
+            }
+
+            if (troca) {
+
+                Livro aux = livros[j];
+
+                livros[j] =
+                    livros[j + 1];
+
+                livros[j + 1] =
+                    aux;
+            }
+        }
+    }
+
+    // Exibe os livros ordenados
+    for (const auto& livro : livros) {
+
+        std::cout
+            << livro.id << " "
+            << livro.nome << " "
+            << livro.preco
+            << std::endl;
+    }
 }
 
 /**
- * @brief Remove produto do catalogo.
+ * Exibe a descrição de um produto a partir do ID.
  */
-void Catalogo::removerProduto(int idProduto) {
+void Catalogo::exibirDescricao(
+        int idProduto) const {
 
-    std::cout << "Remocao ainda nao implementada."
-              << std::endl;
+    std::ifstream arquivo("catalogo.txt");
+
+    std::string linha;
+
+    while (std::getline(arquivo, linha)) {
+
+        std::stringstream ss(linha);
+
+        std::string idTexto;
+
+        std::getline(ss, idTexto, ';');
+
+        if (std::stoi(idTexto)
+            == idProduto) {
+
+            std::string nome;
+            std::string descricao;
+
+            std::getline(ss, nome, ';');
+            std::getline(ss, descricao, ';');
+
+            std::cout
+                << descricao
+                << std::endl;
+
+            return;
+        }
+    }
 }
