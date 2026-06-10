@@ -1,6 +1,6 @@
 #include "Pedido.hpp"
-//#include "Cliente.hpp"
-//#include "Carrinho.hpp"
+#include "Cliente.hpp"
+#include "Carrinho.hpp"
 #include <iostream>
 #include <fstream>
 
