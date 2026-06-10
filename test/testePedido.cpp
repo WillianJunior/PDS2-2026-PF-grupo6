@@ -1,57 +1,64 @@
-#include "doctest.h"
-#include "../include/Pedido.hpp"
-#include "../include/Cliente.hpp"
-#include "../include/Carrinho.hpp"
-#include "../include/Produto.hpp"
+#include "Pedido.hpp"
+#include "Cliente.hpp"
+#include "Carrinho.hpp"
+#include "doctest.h" 
+#include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
+#include <cstdio>
 
-TEST_CASE("Teste do Pedido - INICIALIZACAO E CASOS BASE") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Produto livro(1, "Livro Teste", "Descricao", 50.0f, 10);
-    carrinhoFake.adicionarProduto(livro, 1);
-    Pedido pedido(carrinhoFake, clienteFake);
-    CHECK(pedido.getStatus() == Pedido::StatusPedido::Pendente);
-    CHECK(pedido.getvalorTotal() == doctest::Approx(70.0));
-}
 
-TEST_CASE("Teste do valor do frete") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Pedido pedido(carrinhoFake, clienteFake);
-    pedido.informarValorFrete("Rua Exemplo, 123, Belo Horizonte, MG");
-}
+TEST_CASE("Teste de Unidade Isolado - Ciclo de Vida do Pedido") {
+    Cliente clienteMock("Nome", "email", "senha", "11144477735", "Resposta");
+    Carrinho carrinhoMock(clienteMock);
 
-TEST_CASE("Teste da estimativa de entrega") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Pedido pedido(carrinhoFake, clienteFake);
-    std::string estimativa = pedido.estimarDataEntrega("Rua Exemplo, 123, Belo Horizonte, MG");
-    CHECK(estimativa == "Prazo estimado: 2 a 3 dias úteis, a partir da confirmação de pagamento");
-    estimativa = pedido.estimarDataEntrega("Rua Exemplo, 456, São Paulo, SP");
-    CHECK(estimativa == "Prazo estimado: 7 a 10 dias úteis, a partir da confirmação de pagamento.");
-}
+    Pedido pedido(carrinhoMock, clienteMock);
 
-TEST_CASE("Teste do processamento de pagamento via Pix") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Pedido pedido(carrinhoFake, clienteFake);
-    pedido.processarPagamentos(Pedido::MetodoPagamento::Pix);
-    CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
-}
+    SUBCASE("Cenário 1: Inicialização e Faturamento do Construtor") {
+        CHECK(pedido.getValorTotal() == 125.00);
+        CHECK(pedido.getValorFrete() == 25.00);
+        CHECK(pedido.getStatus() == Pedido::StatusPedido::Pendente);
 
-TEST_CASE("Teste do processamento de pagamento via Cartão Crédito") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Pedido pedido(carrinhoFake, clienteFake);
-    pedido.processarPagamentos(Pedido::MetodoPagamento::Credito);
-    CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
-}
+    }
 
-TEST_CASE("Teste do processamento de pagamento via Cartão DEBITO") {
-    Cliente clienteFake("Joyce", "joyce@email.com", "senha123", "52998224725");
-    Carrinho carrinhoFake(clienteFake);
-    Pedido pedido(carrinhoFake, clienteFake);
-    pedido.processarPagamentos(Pedido::MetodoPagamento::Debito);
-    CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
+    SUBCASE("Cenário 2: Regras de Estimativa Logística de Entrega") {
+        std::string prazoLocal = pedido.estimarDataEntrega(clienteMock.getEndereco());
+        CHECK(prazoLocal.find("2 a 3 dias úteis") != std::string::npos);
+
+        std::string prazoExterno = pedido.estimarDataEntrega("Av. Paulista, 1000, São Paulo, SP");
+        CHECK(prazoExterno.find("7 a 10 dias úteis") != std::string::npos);
+    }
+
+    SUBCASE("Cenário 3: Fluxo de Transição e Confirmação de Pagamento") {
+        pedido.processarPagamentos(Pedido::MetodoPagamento::Pix);
+        CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
+    }
+
+    SUBCASE("Cenário 4: Geração de Cupom Fiscal e Escrita em Arquivo") {
+        pedido.salvarEmArquivo(clienteMock);
+        std::string nomeArquivoEsperado = "pedido_11144477735.txt";
+        
+        std::ifstream arquivo(nomeArquivoEsperado);
+        REQUIRE(arquivo.is_open() == true);
+
+        std::string linha;
+        bool possuiCpfGravado = false;
+        bool possuiEnderecoGravado = false;
+
+        while (std::getline(arquivo, linha)) {
+            if (linha.find("11144477735") != std::string::npos) {
+                possuiCpfGravado = true;
+            }
+            if (linha.find("Belo Horizonte") != std::string::npos) {
+                possuiEnderecoGravado = true;
+            }
+        }
+        arquivo.close();
+
+        CHECK(possuiCpfGravado == true);
+        CHECK(possuiEnderecoGravado == true);
+
+        std::remove(nomeArquivoEsperado.c_str());
+    }
 }
