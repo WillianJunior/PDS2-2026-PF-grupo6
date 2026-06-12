@@ -23,6 +23,7 @@ TEST_CASE("Adicionar produto ao catalogo") {
         29.90f,
         5,
         CategoriaProduto::Ficcao
+        
     );
 
     catalogo.adicionarProduto(livro);
