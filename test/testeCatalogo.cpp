@@ -21,7 +21,8 @@ TEST_CASE("Adicionar produto ao catalogo") {
         "Livro Teste",
         "Descricao de teste",
         29.90f,
-        5
+        5,
+        CategoriaProduto::Ficcao
     );
 
     catalogo.adicionarProduto(livro);
@@ -38,7 +39,8 @@ TEST_CASE("Adicionar mais de um produto") {
         "Livro A",
         "Descricao A",
         10.0f,
-        3
+        3,
+        CategoriaProduto::Ficcao
     );
 
     Produto livro2(

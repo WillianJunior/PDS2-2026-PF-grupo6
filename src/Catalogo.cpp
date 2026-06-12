@@ -10,7 +10,7 @@ Catalogo::Catalogo() {}
 /**
  * Adiciona um novo produto ao arquivo do catálogo.
  */
-void Catalogo::adicionarProaduto(
+void Catalogo::adicionarProduto(
         const Produto& produto) {
 
     std::ofstream arquivo(
