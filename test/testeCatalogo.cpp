@@ -1,5 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-
 #include "doctest.h"
 
 #include "../include/Catalogo.hpp"
@@ -49,7 +47,8 @@ TEST_CASE("Adicionar mais de um produto") {
         "Livro B",
         "Descricao B",
         20.0f,
-        5
+        5,
+        CategoriaProduto::Ficcao
     );
 
     catalogo.adicionarProduto(livro1);
