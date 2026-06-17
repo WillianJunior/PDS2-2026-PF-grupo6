@@ -59,10 +59,9 @@ public:
 
     /**
      * @brief Gera o resumo de faturamento, calcula o valor total.
-     * @param cliente Cliente do pedido
      * @param carrinho Carrinho com os produtos para somatoria de valores.
      */
-    void gerarResumoFaturamento(const Cliente& cliente, const Carrinho& carrinho);
+    void gerarResumoFaturamento(const Carrinho& carrinho);
 
     /**
      * @brief Gerencia o fluxo de mudança do status do pedido(Pendente, pago, enviado e entregue).
@@ -92,5 +91,3 @@ public:
 
 };
 #endif
-
-
