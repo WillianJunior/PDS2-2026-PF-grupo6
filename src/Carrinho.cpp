@@ -2,6 +2,19 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
+
+ProdutoNaoEncontradoException::ProdutoNaoEncontradoException()
+    : std::runtime_error("Produto nao encontrado no carrinho.") {}
+
+EstoqueInsuficienteException::EstoqueInsuficienteException()
+    : std::runtime_error("Estoque insuficiente para a quantidade solicitada.") {}
+
+QuantidadeInvalidaException::QuantidadeInvalidaException()
+    : std::runtime_error("Quantidade invalida.") {}
+
+ErroArquivoCarrinhoException::ErroArquivoCarrinhoException(const std::string& mensagem)
+    : std::runtime_error(mensagem) {}
 
 Carrinho::Carrinho(Cliente& cliente) : _cliente(cliente) {
     carregarCarrinhoDoArquivo();
@@ -18,12 +31,16 @@ int Carrinho::buscarIdProduto(int idProduto) const {
 }
 
 bool Carrinho::validarEstoque(const Produto& produto, int quantidade) const {
-    return produto.getQuantidadeEstoque() >= quantidade;
+    return quantidade > 0 && produto.getQuantidadeEstoque() >= quantidade;
 }
 
 void Carrinho::adicionarProduto(const Produto& produto, int quantidade) {
     if (quantidade <= 0) {
-        return;
+        throw QuantidadeInvalidaException();
+    }
+
+    if (produto.getId() <= 0 || produto.getPreco() < 0 || produto.getQuantidadeEstoque() < 0) {
+        throw std::invalid_argument("Produto com dados invalidos.");
     }
 
     int indiceProduto = buscarIdProduto(produto.getId());
@@ -32,13 +49,13 @@ void Carrinho::adicionarProduto(const Produto& produto, int quantidade) {
         int quantidadeTotal = _quantidades[indiceProduto] + quantidade;
 
         if (!validarEstoque(produto, quantidadeTotal)) {
-            return;
+            throw EstoqueInsuficienteException();
         }
 
         _quantidades[indiceProduto] = quantidadeTotal;
     } else {
         if (!validarEstoque(produto, quantidade)) {
-            return;
+            throw EstoqueInsuficienteException();
         }
 
         _produtos.push_back(produto);
@@ -52,7 +69,7 @@ void Carrinho::removerProduto(int idProduto) {
     int indiceProduto = buscarIdProduto(idProduto);
 
     if (indiceProduto == -1) {
-        return;
+        throw ProdutoNaoEncontradoException();
     }
 
     _produtos.erase(_produtos.begin() + indiceProduto);
@@ -63,13 +80,13 @@ void Carrinho::removerProduto(int idProduto) {
 
 void Carrinho::atualizarQuantidade(int idProduto, int novaQuantidade) {
     if (novaQuantidade < 0) {
-        return;
+        throw QuantidadeInvalidaException();
     }
 
     int indiceProduto = buscarIdProduto(idProduto);
 
     if (indiceProduto == -1) {
-        return;
+        throw ProdutoNaoEncontradoException();
     }
 
     if (novaQuantidade == 0) {
@@ -80,7 +97,7 @@ void Carrinho::atualizarQuantidade(int idProduto, int novaQuantidade) {
     const Produto& produto = _produtos[indiceProduto];
 
     if (!validarEstoque(produto, novaQuantidade)) {
-        return;
+        throw EstoqueInsuficienteException();
     }
 
     _quantidades[indiceProduto] = novaQuantidade;
@@ -163,14 +180,15 @@ void Carrinho::salvarCarrinhoNoArquivo() const {
                 buffer << linha << std::endl;
             }
         }
-
-        arquivoLeitura.close();
     }
 
     std::ofstream arquivoEscrita("Carrinho.txt");
 
-    arquivoEscrita << buffer.str();
+    if (!arquivoEscrita.is_open()) {
+        throw ErroArquivoCarrinhoException("Erro ao abrir Carrinho.txt para escrita.");
+    }
 
+    arquivoEscrita << buffer.str();
     arquivoEscrita << cpfCliente << std::endl;
 
     for (int i = 0; i < static_cast<int>(_produtos.size()); i++) {
@@ -183,7 +201,9 @@ void Carrinho::salvarCarrinhoNoArquivo() const {
 
     arquivoEscrita << "END" << std::endl;
 
-    arquivoEscrita.close();
+    if (!arquivoEscrita.good()) {
+        throw ErroArquivoCarrinhoException("Erro ao escrever dados no arquivo Carrinho.txt.");
+    }
 }
 
 void Carrinho::carregarCarrinhoDoArquivo() {
@@ -222,21 +242,32 @@ void Carrinho::carregarCarrinhoDoArquivo() {
             std::getline(ss, quantidadeStr);
 
             if (idStr.empty() || nome.empty() || precoStr.empty() ||
-                estoqueStr.empty() || quantidadeStr.empty()) {
-                continue;
+            estoqueStr.empty() || quantidadeStr.empty()) {
+            continue;
+}
+
+            try {
+                int id = std::stoi(idStr);
+                float preco = std::stof(precoStr);
+                int estoque = std::stoi(estoqueStr);
+                int quantidade = std::stoi(quantidadeStr);
+
+                if (id <= 0 || preco < 0 || estoque < 0 || quantidade <= 0) {
+                    throw ErroArquivoCarrinhoException("Dados invalidos no arquivo Carrinho.txt.");
+                }
+
+                if (quantidade > estoque) {
+                    throw ErroArquivoCarrinhoException("Quantidade maior que estoque no arquivo Carrinho.txt.");
+                }
+
+                Produto produto(id, nome, "", preco, estoque, CategoriaProduto::Ficcao);
+
+                _produtos.push_back(produto);
+                _quantidades.push_back(quantidade);
             }
-
-            int id = std::stoi(idStr);
-            float preco = std::stof(precoStr);
-            int estoque = std::stoi(estoqueStr);
-            int quantidade = std::stoi(quantidadeStr);
-
-            Produto produto(id, nome, "", preco, estoque, CategoriaProduto::Ficcao);
-
-            _produtos.push_back(produto);
-            _quantidades.push_back(quantidade);
+            catch (const std::exception&) {
+            continue;
+            }
         }
     }
-
-    arquivo.close();
 }
