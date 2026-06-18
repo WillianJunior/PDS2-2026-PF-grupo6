@@ -78,38 +78,45 @@ std::string Pedido::gerarResumoFaturamento(
         const Carrinho& carrinho) {
 
     double subtotal = carrinho.calcularSubtotal();
+    double totalCalculado = carrinho.calcularTotal();
 
-    _valorTotal = carrinho.calcularTotal();
+    if (subtotal < 0.0 || totalCalculado < subtotal) {
+        throw std::runtime_error("Erro critico: Inconsistencia detectada no calculo dos valores do carrinho.");
+    }
 
-    return "Subtotal: R$ " + formatarValor(subtotal) + "\n" +
-           "Frete: R$ "    + formatarValor(_frete)    + "\n" +
-           "Total: R$ "    + formatarValor(_valorTotal) + "\n";
+    _valorTotal = totalCalculado;
+
+    std::cout << "Subtotal: R$ " << subtotal << "\n";
+    std::cout << "Frete: R$ " << _frete << "\n";
+    std::cout << "Total: R$ " << _valorTotal << "\n";
 }
 
-void Pedido::gerenciarStatus(
-        StatusPedido novoStatus) {
 
+void Pedido::gerenciarStatus(StatusPedido novoStatus) {
     _status = novoStatus;
 }
 
 std::string Pedido::exibirMensagemConfirmacao() {
 
     if (_status == StatusPedido::Pago) {
-        return "Pagamento confirmado!";
+        std::cout << "Pagamento confirmado!\n";
+    } else {
+        std::cout << "Aguardando pagamento.\n";
     }
-
-    return "Aguardando pagamento.";
 }
 
-bool Pedido::salvarEmArquivo(
-        const Cliente& cliente) {
+void Pedido::salvarEmArquivo(const Cliente& cliente) {
 
-    std::string nomeArquivo =
-        "pedido_" + cliente.getCpf() + ".txt";
+    if (cliente.getCpf().empty() || cliente.getEndereco().empty()) {
+        throw std::invalid_argument("Erro: Nao eh possivel salvar o pedido com dados de cliente incompletos.");
+    }
 
-    std::ofstream arquivo(nomeArquivo);
+    std::string nomeArquivo = "pedido_" + cliente.getCpf() + ".txt";
+    
+    std::ofstream arquivo(nomeArquivo, std::ios::app); // ios::app evita sobrescrever históricos anteriores
 
     if (!arquivo.is_open()) {
+        throw std::runtime_error("Erro: Nao foi possivel abrir/criar o arquivo de historico: " + nomeArquivo);
         return false;
     }
 
@@ -140,4 +147,7 @@ bool Pedido::salvarEmArquivo(
     arquivo << "========================\n";
 
     return true;
+    arquivo << "========================\n\n";
+    
+    std::cout << "Pedido salvo com sucesso em: " << nomeArquivo << "\n";    
 }
