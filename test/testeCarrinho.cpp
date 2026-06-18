@@ -5,6 +5,7 @@
 #include "Cliente.hpp"
 
 #include <cstdio>
+#include <fstream>
 
 static void limparArquivoCarrinho() {
     std::remove("Carrinho.txt");
@@ -29,7 +30,7 @@ TEST_CASE("Carrinho - adicionar produtos validos") {
     CHECK(carrinho.calcularSubtotal() == doctest::Approx(350.0));
 }
 
-TEST_CASE("Carrinho - nao adiciona quantidade invalida ou estoque insuficiente") {
+TEST_CASE("Carrinho - lanca excecao para quantidade invalida") {
     limparArquivoCarrinho();
 
     Cliente cliente("Cliente Teste", "cliente2@email.com", "senha123", "98765432100", "escola");
@@ -37,14 +38,38 @@ TEST_CASE("Carrinho - nao adiciona quantidade invalida ou estoque insuficiente")
 
     Produto livro(1, "Livro Teste", "Descricao", 80.0f, 3, CategoriaProduto::Ficcao);
 
-    carrinho.adicionarProduto(livro, 0);
-    CHECK(carrinho.getProdutos().empty());
+    CHECK_THROWS_AS(carrinho.adicionarProduto(livro, 0), QuantidadeInvalidaException);
+    CHECK_THROWS_AS(carrinho.adicionarProduto(livro, -2), QuantidadeInvalidaException);
 
-    carrinho.adicionarProduto(livro, -2);
     CHECK(carrinho.getProdutos().empty());
+    CHECK(carrinho.getQuantidades().empty());
+}
 
-    carrinho.adicionarProduto(livro, 10);
-    CHECK(carrinho.getProdutos().empty());
+TEST_CASE("Carrinho - lanca excecao para estoque insuficiente") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente7@email.com", "senha123", "11122233396", "escola");
+    Carrinho carrinho(cliente);
+
+    Produto livro(1, "Livro Estoque", "Descricao", 80.0f, 3, CategoriaProduto::Ficcao);
+
+    CHECK_THROWS_AS(carrinho.adicionarProduto(livro, 10), EstoqueInsuficienteException);
+
+    carrinho.adicionarProduto(livro, 2);
+
+    CHECK_THROWS_AS(carrinho.adicionarProduto(livro, 2), EstoqueInsuficienteException);
+    CHECK(carrinho.getQuantidades()[0] == 2);
+}
+
+TEST_CASE("Carrinho - lanca excecao para produto invalido") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente8@email.com", "senha123", "52998224725", "escola");
+    Carrinho carrinho(cliente);
+
+    Produto produtoInvalido(0, "Produto Invalido", "Descricao", 50.0f, 10, CategoriaProduto::Ficcao);
+
+    CHECK_THROWS_AS(carrinho.adicionarProduto(produtoInvalido, 1), std::invalid_argument);
 }
 
 TEST_CASE("Carrinho - atualizar e remover produto") {
@@ -63,6 +88,47 @@ TEST_CASE("Carrinho - atualizar e remover produto") {
     CHECK(carrinho.calcularSubtotal() == doctest::Approx(200.0));
 
     carrinho.removerProduto(1);
+
+    CHECK(carrinho.getProdutos().empty());
+    CHECK(carrinho.getQuantidades().empty());
+}
+
+TEST_CASE("Carrinho - lanca excecao ao remover produto inexistente") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente9@email.com", "senha123", "39053344705", "escola");
+    Carrinho carrinho(cliente);
+
+    CHECK_THROWS_AS(carrinho.removerProduto(999), ProdutoNaoEncontradoException);
+}
+
+TEST_CASE("Carrinho - lanca excecao ao atualizar produto inexistente ou quantidade invalida") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente10@email.com", "senha123", "15350946056", "escola");
+    Carrinho carrinho(cliente);
+
+    Produto livro(1, "Livro Atualizar", "Descricao", 40.0f, 5, CategoriaProduto::Ficcao);
+
+    CHECK_THROWS_AS(carrinho.atualizarQuantidade(1, -1), QuantidadeInvalidaException);
+    CHECK_THROWS_AS(carrinho.atualizarQuantidade(999, 1), ProdutoNaoEncontradoException);
+
+    carrinho.adicionarProduto(livro, 2);
+
+    CHECK_THROWS_AS(carrinho.atualizarQuantidade(1, 10), EstoqueInsuficienteException);
+    CHECK(carrinho.getQuantidades()[0] == 2);
+}
+
+TEST_CASE("Carrinho - atualizar quantidade para zero remove produto") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente11@email.com", "senha123", "93541134780", "escola");
+    Carrinho carrinho(cliente);
+
+    Produto livro(1, "Livro Zero", "Descricao", 60.0f, 5, CategoriaProduto::Ficcao);
+
+    carrinho.adicionarProduto(livro, 2);
+    carrinho.atualizarQuantidade(1, 0);
 
     CHECK(carrinho.getProdutos().empty());
     CHECK(carrinho.getQuantidades().empty());
@@ -137,8 +203,86 @@ TEST_CASE("Carrinho - salvar e carregar arquivo txt") {
         CHECK(carrinhoCarregado.getProdutos()[0].getPreco() == doctest::Approx(75.0));
         CHECK(carrinhoCarregado.getProdutos()[0].getQuantidadeEstoque() == 8);
         CHECK(carrinhoCarregado.getQuantidades()[0] == 2);
-        CHECK(carrinhoCarregado.calcularSubtotal() == doctest::Approx(150.0));  
+        CHECK(carrinhoCarregado.calcularSubtotal() == doctest::Approx(150.0));
     }
+
+    limparArquivoCarrinho();
+}
+
+TEST_CASE("Carrinho - ignora linhas invalidas ao carregar arquivo") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente12@email.com", "senha123", "40194823030", "escola");
+
+    std::ofstream arquivo("Carrinho.txt");
+
+    arquivo << cliente.getCpf() << std::endl;
+    arquivo << "linha_invalida" << std::endl;
+    arquivo << "abc,Livro Ruim,50,10,1" << std::endl;
+    arquivo << "2,Livro Valido,45,10,2" << std::endl;
+    arquivo << "3,Livro Estoque Invalido,30,1,5" << std::endl;
+    arquivo << "END" << std::endl;
+
+    arquivo.close();
+
+    Carrinho carrinho(cliente);
+
+    REQUIRE(carrinho.getProdutos().size() == 1);
+    REQUIRE(carrinho.getQuantidades().size() == 1);
+
+    CHECK(carrinho.getProdutos()[0].getId() == 2);
+    CHECK(carrinho.getProdutos()[0].getNome() == "Livro Valido");
+    CHECK(carrinho.getQuantidades()[0] == 2);
+
+    limparArquivoCarrinho();
+}
+
+TEST_CASE("Carrinho - incrementa quantidade de produto ja existente") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente13@email.com", "senha123", "40194823030", "escola");
+    Carrinho carrinho(cliente);
+
+    Produto livro(1, "Livro Repetido", "Descricao", 25.0f, 10, CategoriaProduto::Ficcao);
+
+    carrinho.adicionarProduto(livro, 2);
+    carrinho.adicionarProduto(livro, 3);
+
+    REQUIRE(carrinho.getProdutos().size() == 1);
+    REQUIRE(carrinho.getQuantidades().size() == 1);
+
+    CHECK(carrinho.getQuantidades()[0] == 5);
+    CHECK(carrinho.calcularSubtotal() == doctest::Approx(125.0));
+}
+
+TEST_CASE("Carrinho - preserva carrinho de outro cliente ao salvar") {
+    limparArquivoCarrinho();
+
+    Cliente cliente("Cliente Teste", "cliente14@email.com", "senha123", "93541134780", "escola");
+
+    std::ofstream arquivo("Carrinho.txt");
+    arquivo << "00000000000" << std::endl;
+    arquivo << "9,Livro Outro Cliente,20,5,1" << std::endl;
+    arquivo << "END" << std::endl;
+    arquivo.close();
+
+    Carrinho carrinho(cliente);
+
+    Produto livro(1, "Livro Cliente Atual", "Descricao", 30.0f, 5, CategoriaProduto::Ficcao);
+    carrinho.adicionarProduto(livro, 1);
+
+    std::ifstream leitura("Carrinho.txt");
+    std::string conteudo;
+    std::string linha;
+
+    while (std::getline(leitura, linha)) {
+        conteudo += linha + "\n";
+    }
+
+    CHECK(conteudo.find("00000000000") != std::string::npos);
+    CHECK(conteudo.find("Livro Outro Cliente") != std::string::npos);
+    CHECK(conteudo.find(cliente.getCpf()) != std::string::npos);
+    CHECK(conteudo.find("Livro Cliente Atual") != std::string::npos);
 
     limparArquivoCarrinho();
 }
