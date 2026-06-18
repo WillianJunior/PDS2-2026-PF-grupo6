@@ -69,15 +69,19 @@ void Pedido::processarPagamentos(MetodoPagamento metodo) {
 
 void Pedido::gerarResumoFaturamento(const Carrinho& carrinho) {
     double subtotal = carrinho.calcularSubtotal();
-    _valorTotal = carrinho.calcularTotal();
+    double totalCalculado = carrinho.calcularTotal();
 
-    assert(subtotal >= 0.0);
-    assert(_valorTotal >= subtotal);
+    if (subtotal < 0.0 || totalCalculado < subtotal) {
+        throw std::runtime_error("Erro critico: Inconsistencia detectada no calculo dos valores do carrinho.");
+    }
+
+    _valorTotal = totalCalculado;
 
     std::cout << "Subtotal: R$ " << subtotal << "\n";
     std::cout << "Frete: R$ " << _frete << "\n";
     std::cout << "Total: R$ " << _valorTotal << "\n";
 }
+
 
 void Pedido::gerenciarStatus(StatusPedido novoStatus) {
     _status = novoStatus;
@@ -100,16 +104,17 @@ void Pedido::exibirMensagemConfirmacao() {
 }
 
 void Pedido::salvarEmArquivo(const Cliente& cliente) {
-    if (cliente.getCpf().empty()) {
-        throw std::invalid_argument("Erro: Nao eh possivel salvar o arquivo sem o CPF do cliente.");
+
+    if (cliente.getCpf().empty() || cliente.getEndereco().empty()) {
+        throw std::invalid_argument("Erro: Nao eh possivel salvar o pedido com dados de cliente incompletos.");
     }
 
     std::string nomeArquivo = "pedido_" + cliente.getCpf() + ".txt";
-
-    std::ofstream arquivo(nomeArquivo);
+    
+    std::ofstream arquivo(nomeArquivo, std::ios::app); // ios::app evita sobrescrever históricos anteriores
 
     if (!arquivo.is_open()) {
-        throw std::runtime_error("Erro: Nao foi possivel abrir/criar o arquivo de historico do pedido: " + nomeArquivo);
+        throw std::runtime_error("Erro: Nao foi possivel abrir/criar o arquivo de historico: " + nomeArquivo);
     }
 
     arquivo << "=== RESUMO DO PEDIDO ===\n";
@@ -131,8 +136,7 @@ void Pedido::salvarEmArquivo(const Cliente& cliente) {
     }
     
     arquivo << estimarDataEntrega(cliente.getEndereco()) << "\n";
-    arquivo << "========================\n";
-
-    arquivo.close(); 
-    std::cout << "Pedido salvo com sucesso em: " << nomeArquivo << "\n";    // 
+    arquivo << "========================\n\n";
+    
+    std::cout << "Pedido salvo com sucesso em: " << nomeArquivo << "\n";    
 }
