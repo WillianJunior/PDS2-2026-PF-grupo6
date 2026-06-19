@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
 static std::string formatarValor(double valor) {
     std::ostringstream oss;
@@ -12,22 +13,31 @@ static std::string formatarValor(double valor) {
     return oss.str();
 }
 
+
 Pedido::Pedido(const Carrinho& carrinho,
                const Cliente& cliente) {
 
     _status = StatusPedido::Pendente;
-    _frete = carrinho.getValorFrete();
-    _valorTotal = 0.0;
+    _frete  = carrinho.getValorFrete();
 
-    gerarResumoFaturamento(cliente, carrinho);
+    double subtotal       = carrinho.calcularSubtotal();
+    double totalCalculado = carrinho.calcularTotal();
+
+    if (subtotal < 0.0 || totalCalculado < subtotal) {
+        throw std::runtime_error(
+            "Erro critico: inconsistencia detectada "
+            "nos valores do carrinho.");
+    }
+
+    _valorTotal = totalCalculado;
 }
+
 
 std::string Pedido::informarValorFrete(
         const std::string& endereco) {
 
     return "O valor do frete para '" +
-           endereco +
-           "' e: R$ " +
+           endereco + "' e: R$ " +
            formatarValor(_frete);
 }
 
@@ -44,6 +54,7 @@ std::string Pedido::estimarDataEntrega(
     return "Prazo estimado: 7 a 10 dias uteis, "
            "a partir da confirmacao de pagamento.";
 }
+
 
 std::string Pedido::processarPagamentos(
         MetodoPagamento metodo) {
@@ -66,6 +77,11 @@ std::string Pedido::processarPagamentos(
                     formatarValor(_valorTotal) + "\n";
 
         gerenciarStatus(StatusPedido::Pago);
+
+    } else {
+    
+        throw std::invalid_argument(
+            "Metodo de pagamento invalido.");
     }
 
     resultado += exibirMensagemConfirmacao();
@@ -73,55 +89,63 @@ std::string Pedido::processarPagamentos(
     return resultado;
 }
 
+
 std::string Pedido::gerarResumoFaturamento(
         const Cliente& cliente,
         const Carrinho& carrinho) {
 
     double subtotal = carrinho.calcularSubtotal();
-    double totalCalculado = carrinho.calcularTotal();
 
-    if (subtotal < 0.0 || totalCalculado < subtotal) {
-        throw std::runtime_error("Erro critico: Inconsistencia detectada no calculo dos valores do carrinho.");
-    }
+    std::ostringstream oss;
+    oss << "Subtotal: R$ " << formatarValor(subtotal)    << "\n"
+        << "Frete: R$ "    << formatarValor(_frete)      << "\n"
+        << "Total: R$ "    << formatarValor(_valorTotal) << "\n";
 
-    _valorTotal = totalCalculado;
-
-    std::cout << "Subtotal: R$ " << subtotal << "\n";
-    std::cout << "Frete: R$ " << _frete << "\n";
-    std::cout << "Total: R$ " << _valorTotal << "\n";
+    return oss.str();
 }
 
+void Pedido::gerenciarStatus(
+        StatusPedido novoStatus) {
 
-void Pedido::gerenciarStatus(StatusPedido novoStatus) {
     _status = novoStatus;
 }
 
 std::string Pedido::exibirMensagemConfirmacao() {
 
     if (_status == StatusPedido::Pago) {
-        std::cout << "Pagamento confirmado!\n";
-    } else {
-        std::cout << "Aguardando pagamento.\n";
+        return "Pagamento confirmado!\n";
     }
+
+    return "Aguardando pagamento.\n";
 }
 
-void Pedido::salvarEmArquivo(const Cliente& cliente) {
 
-    if (cliente.getCpf().empty() || cliente.getEndereco().empty()) {
-        throw std::invalid_argument("Erro: Nao eh possivel salvar o pedido com dados de cliente incompletos.");
+void Pedido::salvarEmArquivo(
+        const Cliente& cliente) {
+
+    if (cliente.getCpf().empty() ||
+        cliente.getEndereco().empty()) {
+
+        throw std::invalid_argument(
+            "Nao e possivel salvar pedido com "
+            "dados de cliente incompletos.");
     }
 
-    std::string nomeArquivo = "pedido_" + cliente.getCpf() + ".txt";
-    
-    std::ofstream arquivo(nomeArquivo, std::ios::app); // ios::app evita sobrescrever históricos anteriores
+    std::string nomeArquivo =
+        "pedido_" + cliente.getCpf() + ".txt";
+
+    std::ofstream arquivo(
+        nomeArquivo, std::ios::app);
 
     if (!arquivo.is_open()) {
-        throw std::runtime_error("Erro: Nao foi possivel abrir/criar o arquivo de historico: " + nomeArquivo);
-        return false;
+        throw std::runtime_error(
+            "Nao foi possivel abrir o arquivo: " +
+            nomeArquivo);
     }
 
+
     arquivo << "=== RESUMO DO PEDIDO ===\n";
-    arquivo << "CPF do Cliente: " << cliente.getCpf() << "\n";
+    arquivo << "CPF do Cliente: " << cliente.getCpf()      << "\n";
     arquivo << "Endereco: "       << cliente.getEndereco() << "\n";
     arquivo << "------------------------\n";
     arquivo << "VALORES:\n";
@@ -143,11 +167,8 @@ void Pedido::salvarEmArquivo(const Cliente& cliente) {
             arquivo << "Entregue\n"; break;
     }
 
-    arquivo << estimarDataEntrega(cliente.getEndereco()) << "\n";
-    arquivo << "========================\n";
+    arquivo << estimarDataEntrega(
+        cliente.getEndereco()) << "\n";
 
-    return true;
     arquivo << "========================\n\n";
-    
-    std::cout << "Pedido salvo com sucesso em: " << nomeArquivo << "\n";    
 }

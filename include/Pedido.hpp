@@ -1,6 +1,8 @@
 #ifndef PEDIDO_HPP
 #define PEDIDO_HPP
+
 #include <string>
+
 class Cliente;
 class Carrinho;
 
@@ -8,86 +10,85 @@ class Carrinho;
  * @class Pedido
  * @brief Representa o processamento final de uma compra no sistema.
  */
-class Pedido{
-  public:
-  enum class MetodoPagamento {
-    Pix,
-    Credito,
-    Debito
-  };
-    public:
-  enum class StatusPedido {
-    Pendente,
-    Pago,
-    Enviado,
-    Entregue
-  };
-private:
-StatusPedido _status;
-double _frete;
-double _valorTotal;
-  
+class Pedido {
 public:
-     /** 
-     * @brief Este construtor extrai as informacoes de produtos, quantidades e valores 
-     * diretamente do carrinho, associa ao cliente responsavel e define o 
-     * status inicial como "Pendente".
-     * 
-     * @param carrinho Referencia constante para o carrinho contendo os produtos.
-     * O uso de const garante que os dados do carrinho nao sejam alterados na criacao do pedido.
-     * @param cliente Referencia constante para o cliente que esta realizando o pedido.
-     * O uso de const garante a integridade dos dados do cliente durante a inicializacao.
-     */
-    Pedido(const Carrinho& carrinho, const Cliente& cliente);
-   
+    enum class MetodoPagamento {
+        Pix,
+        Credito,
+        Debito
+    };
+
+    enum class StatusPedido {
+        Pendente,
+        Pago,
+        Enviado,
+        Entregue
+    };
+
+private:
+    StatusPedido _status;
+    double _frete;
+    double _valorTotal;
+
+public:
     /**
-     * @brief Calcula e informa o valor de frete para o pedido;
-     * @param endereco Endereco de entrega
+     * @brief Inicializa o pedido a partir do carrinho e cliente.
+     * @throws std::runtime_error se os valores do carrinho forem inconsistentes.
      */
-   void informarValorFrete(const std::string& endereco);
-    /**
-     * @brief Estima a data de entrega de acordo com a localizacao do cliente.
-     * @param endereco Endereco de entrega
-     * @return String com a data ou prazo estimado.
-     */
-    std::string estimarDataEntrega(const std::string& endereco);
-    /**
-    * @brief Processa pagamento via Pix, cartao de credito ou debito.
-    * @param metodo metodo enum indicando o metodo de pagamento escolhido (Pix, crédito, débito)
-    */
-    void processarPagamentos(MetodoPagamento metodo);
+    Pedido(const Carrinho& carrinho,
+           const Cliente& cliente);
 
     /**
-     * @brief Gera o resumo de faturamento, calcula o valor total.
-     * @param carrinho Carrinho com os produtos para somatoria de valores.
+     * @brief Retorna o valor do frete formatado.
+     * @return String para exibição pela UI.
      */
-    void gerarResumoFaturamento(const Carrinho& carrinho);
+    std::string informarValorFrete(
+        const std::string& endereco);
 
     /**
-     * @brief Gerencia o fluxo de mudança do status do pedido(Pendente, pago, enviado e entregue).
-     * @param novoStatus O novo estado do pedido.
+     * @brief Estima prazo de entrega pelo endereço.
+     * @return String com o prazo estimado.
+     */
+    std::string estimarDataEntrega(
+        const std::string& endereco);
+
+    /**
+     * @brief Processa pagamento e retorna resultado para a UI.
+     * @throws std::invalid_argument se o método for inválido.
+     * @return String com o resultado do pagamento.
+     */
+    std::string processarPagamentos(
+        MetodoPagamento metodo);
+
+    /**
+     * @brief Retorna o resumo de faturamento para a UI exibir.
+     * @return String com subtotal, frete e total.
+     */
+    std::string gerarResumoFaturamento(
+        const Cliente& cliente,
+        const Carrinho& carrinho);
+
+    /**
+     * @brief Atualiza o status do pedido.
      */
     void gerenciarStatus(StatusPedido novoStatus);
 
     /**
-     * @brief Exibe mensagem de confirmacao de pagamento.
+     * @brief Retorna mensagem de confirmação para a UI exibir.
+     * @return String com a mensagem.
      */
-    void exibirMensagemConfirmacao();
+    std::string exibirMensagemConfirmacao();
 
-     /**
-     * @brief Retorna o status do pedido. O metodo é const para garantir que a consulta ao status nao modifique nenhum atributo da classe.
-     * @return Enum contendo o status.
+    /**
+     * @brief Salva o resumo do pedido em arquivo histórico.
+     * @throws std::invalid_argument se dados do cliente estiverem incompletos.
+     * @throws std::runtime_error se o arquivo não puder ser aberto.
      */
-    StatusPedido getStatus()const {return _status;}
-
-      /**
-     * @brief Retorna o valor total do pedido. O uso de const assegura que este metodo funcione apenas como um seletor (getter), sem risco de alterar o valor do pedido.
-     * @return Double contendo o valor total (produtos + frete).
-     */
-    double getValorTotal() const {return _valorTotal;}
     void salvarEmArquivo(const Cliente& cliente);
-    double getValorFrete() const { return _frete;}
 
-
+    StatusPedido getStatus()    const { return _status;     }
+    double getValorTotal()      const { return _valorTotal; }
+    double getValorFrete()      const { return _frete;      }
 };
+
 #endif

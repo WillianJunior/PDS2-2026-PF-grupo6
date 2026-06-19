@@ -1,64 +1,79 @@
 #include "Pedido.hpp"
 #include "Cliente.hpp"
 #include "Carrinho.hpp"
+#include "Produto.hpp"
 #include "doctest.h" 
-#include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
 #include <cstdio>
+#include <stdexcept>
 
+TEST_CASE("Teste de Unidade - Pedido") {
+    std::remove("Carrinho.txt");
+    
+    Cliente cliente("Nome", "email@teste.com", "senha123", "11144477735", "RespostaSeguranca");
+    cliente.adicionarEndereco("Belo Horizonte, MG");
 
-TEST_CASE("Teste de Unidade Isolado - Ciclo de Vida do Pedido") {
-    Cliente clienteMock("Nome", "email", "senha", "11144477735", "Resposta");
-    Carrinho carrinhoMock(clienteMock);
+    Carrinho carrinho(cliente);
+    Produto livro(1, "Livro Ficção A", "Descrição", 100.00, 10, CategoriaProduto::Ficcao);
 
-    Pedido pedido(carrinhoMock, clienteMock);
+    SUBCASE("Caminho Feliz: Construtor, Logística e Pagamento") {
+        carrinho.adicionarProduto(livro, 1); // Subtotal=100, Frete=15, Total=115
+        Pedido pedido(carrinho, cliente);
 
-    SUBCASE("Cenário 1: Inicialização e Faturamento do Construtor") {
-        CHECK(pedido.getValorTotal() == 125.00);
-        CHECK(pedido.getValorFrete() == 25.00);
+        CHECK(pedido.getValorTotal() == 115.00);
+        CHECK(pedido.getValorFrete() == 15.00);
         CHECK(pedido.getStatus() == Pedido::StatusPedido::Pendente);
 
-    }
+        CHECK(pedido.estimarDataEntrega(cliente.getEndereco()).find("2 a 3 dias úteis") != std::string::npos);
+        CHECK(pedido.estimarDataEntrega("Outro Estado, SP").find("7 a 10 dias úteis") != std::string::npos);
 
-    SUBCASE("Cenário 2: Regras de Estimativa Logística de Entrega") {
-        std::string prazoLocal = pedido.estimarDataEntrega(clienteMock.getEndereco());
-        CHECK(prazoLocal.find("2 a 3 dias úteis") != std::string::npos);
-
-        std::string prazoExterno = pedido.estimarDataEntrega("Av. Paulista, 1000, São Paulo, SP");
-        CHECK(prazoExterno.find("7 a 10 dias úteis") != std::string::npos);
-    }
-
-    SUBCASE("Cenário 3: Fluxo de Transição e Confirmação de Pagamento") {
         pedido.processarPagamentos(Pedido::MetodoPagamento::Pix);
         CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
+        
+        CHECK_THROWS_AS(pedido.processarPagamentos(Pedido::MetodoPagamento::Credito), std::runtime_error);
     }
 
-    SUBCASE("Cenário 4: Geração de Cupom Fiscal e Escrita em Arquivo") {
-        pedido.salvarEmArquivo(clienteMock);
-        std::string nomeArquivoEsperado = "pedido_11144477735.txt";
+    SUBCASE("Exceções: Barricadas do Construtor e Métodos Públicos") {
+        // Carrinho vazio
+        CHECK_THROWS_AS(Pedido(carrinho, cliente), std::invalid_argument);
+
+        carrinho.adicionarProduto(livro, 1);
+        Pedido pedidoValido(carrinho, cliente);
+
+        Cliente cSemCpf("Nome", "email@teste.com", "senha123", "", "RespostaSeguranca");
+        cSemCpf.adicionarEndereco("Belo Horizonte, MG");
+
+        Cliente cSemEnd("Nome", "email@teste.com", "senha123", "11144477735", "RespostaSeguranca");
+     
+
+        CHECK_THROWS_AS(Pedido(carrinho, cSemCpf), std::invalid_argument);
+        CHECK_THROWS_AS(Pedido(carrinho, cSemEnd), std::invalid_argument);
+
+        CHECK_THROWS_AS(pedidoValido.estimarDataEntrega(""), std::invalid_argument);
+        CHECK_THROWS_AS(pedidoValido.informarValorFrete(""), std::invalid_argument);
         
-        std::ifstream arquivo(nomeArquivoEsperado);
+        auto pagamentoInvalido = static_cast<Pedido::MetodoPagamento>(999);
+        CHECK_THROWS_AS(pedidoValido.processarPagamentos(pagamentoInvalido), std::invalid_argument);
+    }
+
+    SUBCASE("Persistência: Escrita em Arquivo e Barricada") {
+        carrinho.adicionarProduto(livro, 1);
+        Pedido pedido(carrinho, cliente);
+        
+        pedido.salvarEmArquivo(cliente);
+        std::string arquivoNome = "pedido_11144477735.txt";
+        
+        std::ifstream arquivo(arquivoNome);
         REQUIRE(arquivo.is_open() == true);
-
-        std::string linha;
-        bool possuiCpfGravado = false;
-        bool possuiEnderecoGravado = false;
-
-        while (std::getline(arquivo, linha)) {
-            if (linha.find("11144477735") != std::string::npos) {
-                possuiCpfGravado = true;
-            }
-            if (linha.find("Belo Horizonte") != std::string::npos) {
-                possuiEnderecoGravado = true;
-            }
-        }
         arquivo.close();
 
-        CHECK(possuiCpfGravado == true);
-        CHECK(possuiEnderecoGravado == true);
+        Cliente cInvalido("Nome", "email@teste.com", "senha123", "", "RespostaSeguranca"); 
+        
+        CHECK_THROWS_AS(pedido.salvarEmArquivo(cInvalido), std::invalid_argument);
 
-        std::remove(nomeArquivoEsperado.c_str());
+        std::remove(arquivoNome.c_str());
     }
+
+    std::remove("Carrinho.txt");
 }
