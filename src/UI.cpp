@@ -245,37 +245,42 @@ void UI::telaCheckout(Carrinho& carrinho,
 
     imprimirTitulo("FINALIZAR COMPRA");
 
-    Pedido pedido(carrinho, cliente);
+    try {
 
-    std::cout << pedido.gerarResumoFaturamento(
-        cliente, carrinho);
+        Pedido pedido(carrinho, cliente);
 
-    std::cout << pedido.informarValorFrete(
-        cliente.getEndereco()) << "\n";
+        std::cout << pedido.gerarResumoFaturamento(
+            cliente, carrinho);
 
-    std::cout << pedido.estimarDataEntrega(
-        cliente.getEndereco()) << "\n";
+        std::cout << pedido.informarValorFrete(
+            cliente.getEndereco()) << "\n";
 
-    std::cout << "1 - Pix  2 - Credito  3 - Debito\n";
+        std::cout << pedido.estimarDataEntrega(
+            cliente.getEndereco()) << "\n";
 
-    int opcao = lerOpcao("Forma de pagamento: ");
+        std::cout << "1 - Pix  2 - Credito  3 - Debito\n";
 
-    Pedido::MetodoPagamento metodo =
-        Pedido::MetodoPagamento::Pix;
+        int opcao = lerOpcao("Forma de pagamento: ");
 
-    if (opcao == 2) {
-        metodo = Pedido::MetodoPagamento::Credito;
-    } else if (opcao == 3) {
-        metodo = Pedido::MetodoPagamento::Debito;
-    }
+        Pedido::MetodoPagamento metodo =
+            Pedido::MetodoPagamento::Pix;
 
-    std::cout << pedido.processarPagamentos(metodo) << "\n";
+        if (opcao == 2) {
+            metodo = Pedido::MetodoPagamento::Credito;
+        } else if (opcao == 3) {
+            metodo = Pedido::MetodoPagamento::Debito;
+        }
 
-    if (pedido.salvarEmArquivo(cliente)) {
+        std::cout << pedido.processarPagamentos(metodo)
+                  << "\n";
+
+        pedido.salvarEmArquivo(cliente);
+
         exibirSucesso("Pedido salvo com sucesso!");
         carrinho.limparCarrinho();
-    } else {
-        exibirErro("Falha ao salvar o pedido.");
+
+    } catch (const std::exception& e) {
+        exibirErro(e.what());
     }
 }
 
