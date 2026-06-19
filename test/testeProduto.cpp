@@ -1,7 +1,8 @@
 #include "doctest.h"
+#include <stdexcept>
 #include "../include/Produto.hpp"
 
-TEST_CASE("Testando a classe Produto - Fluxo Completo") {
+TEST_CASE("Testando a classe Produto - Fluxo Completo com Excecoes") {
 
     Produto p(1, "A Fundação", "Ficção científica de Isaac Asimov", 50.00, 10, CategoriaProduto::Ficcao);
 
@@ -14,28 +15,32 @@ TEST_CASE("Testando a classe Produto - Fluxo Completo") {
         CHECK(p.getCategoria() == CategoriaProduto::Ficcao);
     }
 
+    SUBCASE("Construtor barrando valores inválidos (Exceções)") {
+
+        CHECK_THROWS_AS(Produto(2, "Livro", "Desc", -10.0, 5, CategoriaProduto::Tecnico), std::invalid_argument);
+        CHECK_THROWS_AS(Produto(3, "Livro", "Desc", 10.0, -5, CategoriaProduto::Tecnico), std::invalid_argument);
+    }
+
     SUBCASE("Testando alteração de preço (Setters)") {
-  
-        CHECK(p.setPreco(60.50) == true);
+        CHECK_NOTHROW(p.setPreco(60.50));
         CHECK(p.getPreco() == 60.50);
 
-    
-        CHECK(p.setPreco(-10.00) == false);
+        CHECK_THROWS_AS(p.setPreco(-10.00), std::invalid_argument);
         CHECK(p.getPreco() == 60.50); 
     }
 
-    SUBCASE("Testando a gestão de estoque") {
-    
-        p.adicionarEstoque(5);
+    SUBCASE("Testando a gestão de estoque defensiva") {
+        CHECK_NOTHROW(p.adicionarEstoque(5));
         CHECK(p.getQuantidadeEstoque() == 15);
 
-        p.adicionarEstoque(-2);
-        CHECK(p.getQuantidadeEstoque() == 15);
-
-        CHECK(p.debitarEstoque(5) == true);
+        CHECK_THROWS_AS(p.adicionarEstoque(-2), std::invalid_argument);
+        CHECK(p.getQuantidadeEstoque() == 15); 
+        CHECK_NOTHROW(p.debitarEstoque(5));
         CHECK(p.getQuantidadeEstoque() == 10);
 
-        CHECK(p.debitarEstoque(20) == false);
+        CHECK_THROWS_AS(p.debitarEstoque(20), std::out_of_range);
         CHECK(p.getQuantidadeEstoque() == 10);
+
+        CHECK_THROWS_AS(p.debitarEstoque(-5), std::invalid_argument);
     }
 }
