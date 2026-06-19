@@ -7,14 +7,11 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 const std::string ARQUIVO_USUARIOS = "usuarios.txt";
 
-/**
- * @brief Lê os dados completos de um usuário a partir do email.
- * Necessário para reconstruir o objeto Cliente após o login.
- */
 static bool carregarDadosUsuario(
         const std::string& email,
         std::string& nome,
@@ -32,21 +29,21 @@ static bool carregarDadosUsuario(
 
     while (std::getline(arquivo, linha)) {
 
+        if (linha.empty()) continue;
+
         std::stringstream ss(linha);
 
-        std::string tipo;
-        std::string n;
-        std::string e;
-        std::string s;
-        std::string c;
-        std::string r;
+        std::string tipo, n, e, s, c, r;
 
-        std::getline(ss, tipo, ';');
-        std::getline(ss, n,    ';');
-        std::getline(ss, e,    ';');
-        std::getline(ss, s,    ';');
-        std::getline(ss, c,    ';');
-        std::getline(ss, r,    ';');
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, n,    ';') ||
+            !std::getline(ss, e,    ';') ||
+            !std::getline(ss, s,    ';') ||
+            !std::getline(ss, c,    ';') ||
+            !std::getline(ss, r,    ';')) {
+
+            continue;
+        }
 
         if (e == email) {
             nome     = n;
@@ -64,7 +61,7 @@ int main() {
 
     UI ui;
     Catalogo catalogo;
-    Estoque estoque;
+    Estoque  estoque;
 
     int opcao;
 
@@ -78,48 +75,49 @@ int main() {
             std::string email = ui.lerTexto("Email: ");
             std::string senha = ui.lerTexto("Senha: ");
 
-            std::string tipo = Usuario::fazerLogin(
-                email, senha, ARQUIVO_USUARIOS);
+            try {
+                std::string tipo = Usuario::fazerLogin(
+                    email, senha, ARQUIVO_USUARIOS);
 
-            if (tipo == "invalido") {
-                ui.exibirErro(
-                    "Email ou senha incorretos.");
-                continue;
-            }
+                if (tipo == "invalido") {
+                    ui.exibirErro(
+                        "Email ou senha incorretos.");
+                    continue;
+                }
 
-            if (tipo == "admin") {
-
-                ui.exibirSucesso(
-                    "Login como Administrador!");
-
-                ui.exibirMenuAdministrador(
-                    catalogo, estoque);
-
-            } else {
-
-                std::string nome;
-                std::string senhaArq;
-                std::string cpf;
-                std::string resposta;
+                std::string nome, senhaArq, cpf, resposta;
 
                 if (!carregarDadosUsuario(
-                        email, nome,
-                        senhaArq, cpf, resposta)) {
+                        email, nome, senhaArq, cpf, resposta)) {
 
                     ui.exibirErro(
                         "Erro ao carregar dados do usuario.");
                     continue;
                 }
 
-                ui.exibirSucesso("Login como Cliente!");
+                if (tipo == "administrador") {
 
-                Cliente cliente(
-                    nome, email, senha, cpf, resposta);
+                    ui.exibirSucesso(
+                        "Login como Administrador!");
 
-                Carrinho carrinho(cliente);
+                    ui.exibirMenuAdministrador(
+                        catalogo, estoque);
 
-                ui.exibirMenuCliente(
-                    carrinho, catalogo, cliente);
+                } else {
+
+                    ui.exibirSucesso("Login como Cliente!");
+
+                    Cliente cliente(
+                        nome, email, senha, cpf, resposta);
+
+                    Carrinho carrinho(cliente);
+
+                    ui.exibirMenuCliente(
+                        carrinho, catalogo, cliente);
+                }
+
+            } catch (const std::exception& e) {
+                ui.exibirErro(e.what());
             }
 
         } else if (opcao == 2) {
