@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <stdexcept>
 
 Usuario::Usuario(std::string nome,
                  std::string email,
@@ -13,10 +14,44 @@ Usuario::Usuario(std::string nome,
       _email(email),
       _senha(senha),
       _tipo(tipo),
-      _respostaSeguranca(respostaSeguranca) {}
+      _respostaSeguranca(respostaSeguranca) {
+
+    if (_nome.empty()) {
+        throw std::invalid_argument("Nome invalido.");
+    }
+
+    if (_nome.find(';') != std::string::npos) {
+        throw std::invalid_argument("Nome nao pode conter ponto e virgula.");
+    }
+
+    if (!validarEmail(_email)) {
+        throw std::invalid_argument("Email invalido.");
+    }
+
+    if (!gerenciarSenha(_senha)) {
+        throw std::invalid_argument("Senha invalida.");
+    }
+
+    if (_tipo != "cliente" && _tipo != "administrador") {
+        throw std::invalid_argument("Tipo de usuario invalido.");
+    }
+
+    if (_respostaSeguranca.empty()) {
+        throw std::invalid_argument("Resposta de seguranca invalida.");
+    }
+
+    if (_respostaSeguranca.find(';') != std::string::npos) {
+        throw std::invalid_argument("Resposta de seguranca nao pode conter ponto e virgula.");
+    }
+}
 
 bool Usuario::validarEmail(std::string novoEmail) const {
     if (novoEmail.empty()) {
+        return false;
+    }
+
+    if (novoEmail.find(' ') != std::string::npos ||
+        novoEmail.find(';') != std::string::npos) {
         return false;
     }
 
@@ -27,34 +62,297 @@ bool Usuario::validarEmail(std::string novoEmail) const {
 
     for (size_t i = 0; i < novoEmail.size(); i++) {
         if (novoEmail[i] == '@') {
+            if (temArroba) {
+                return false;
+            }
+
             temArroba = true;
             posArroba = i;
         }
-        // ponto só conta se vier depois do @
+
         if (novoEmail[i] == '.' && temArroba) {
             temPonto = true;
             posPonto = i;
         }
     }
 
-    // @ não pode ser o primeiro char, e precisa ter ponto após o @
     if (!temArroba || posArroba == 0 || !temPonto) {
         return false;
     }
 
-    // precisa ter pelo menos 2 chars após o ponto (ex: .com)
+    if (posArroba == novoEmail.size() - 1) {
+        return false;
+    }
+
+    if (posPonto == posArroba + 1) {
+        return false;
+    }
+
     return (novoEmail.size() - posPonto) > 2;
 }
 
 bool Usuario::gerenciarSenha(std::string novaSenha) const {
-    return novaSenha.size() >= 6;
+    if (novaSenha.size() < 6) {
+        return false;
+    }
+
+    if (novaSenha.find(';') != std::string::npos) {
+        return false;
+    }
+
+    return true;
 }
 
 void Usuario::armazenarNome(std::string novoNome) {
+    if (novoNome.empty()) {
+        throw std::invalid_argument("Nome invalido.");
+    }
+
+    if (novoNome.find(';') != std::string::npos) {
+        throw std::invalid_argument("Nome nao pode conter ponto e virgula.");
+    }
+
     _nome = novoNome;
 }
 
-void Usuario::atualizarDadosPerfil() {
+void Usuario::alterarNome(std::string novoNome,
+                          const std::string& nomeArquivo) {
+    if (novoNome.empty()) {
+        throw std::invalid_argument("Nome invalido.");
+    }
+
+    if (novoNome.find(';') != std::string::npos) {
+        throw std::invalid_argument("Nome nao pode conter ponto e virgula.");
+    }
+
+    std::ifstream entrada(nomeArquivo);
+
+    if (!entrada.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
+    }
+
+    std::vector<std::string> linhas;
+    std::string linha;
+    bool encontrou = false;
+
+    while (std::getline(entrada, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(linha);
+
+        std::string tipo;
+        std::string nomeArquivoUsuario;
+        std::string emailArquivo;
+        std::string senhaArquivo;
+        std::string cpfArquivo;
+        std::string respostaArquivo;
+
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nomeArquivoUsuario, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senhaArquivo, ';') ||
+            !std::getline(ss, cpfArquivo, ';') ||
+            !std::getline(ss, respostaArquivo, ';')) {
+
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
+
+        if (emailArquivo == _email) {
+            nomeArquivoUsuario = novoNome;
+            encontrou = true;
+        }
+
+        linhas.push_back(
+            tipo + ";" +
+            nomeArquivoUsuario + ";" +
+            emailArquivo + ";" +
+            senhaArquivo + ";" +
+            cpfArquivo + ";" +
+            respostaArquivo
+        );
+    }
+
+    if (!encontrou) {
+        throw std::runtime_error("Usuario nao encontrado no arquivo.");
+    }
+
+    std::ofstream saida(nomeArquivo);
+
+    if (!saida.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
+    }
+
+    for (const std::string& l : linhas) {
+        saida << l << "\n";
+
+        if (!saida.good()) {
+            throw std::runtime_error("Erro ao escrever dados no arquivo usuarios.txt.");
+        }
+    }
+
+    _nome = novoNome;
+}
+
+void Usuario::alterarEmail(std::string novoEmail,
+                           const std::string& nomeArquivo) {
+    if (!validarEmail(novoEmail)) {
+        throw std::invalid_argument("Email invalido.");
+    }
+
+    if (novoEmail == _email) {
+        return;
+    }
+
+    if (emailJaCadastrado(novoEmail, nomeArquivo)) {
+        throw std::runtime_error("Email ja cadastrado.");
+    }
+
+    std::ifstream entrada(nomeArquivo);
+
+    if (!entrada.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
+    }
+
+    std::vector<std::string> linhas;
+    std::string linha;
+    bool encontrou = false;
+
+    while (std::getline(entrada, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(linha);
+
+        std::string tipo;
+        std::string nomeArquivoUsuario;
+        std::string emailArquivo;
+        std::string senhaArquivo;
+        std::string cpfArquivo;
+        std::string respostaArquivo;
+
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nomeArquivoUsuario, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senhaArquivo, ';') ||
+            !std::getline(ss, cpfArquivo, ';') ||
+            !std::getline(ss, respostaArquivo, ';')) {
+
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
+
+        if (emailArquivo == _email) {
+            emailArquivo = novoEmail;
+            encontrou = true;
+        }
+
+        linhas.push_back(
+            tipo + ";" +
+            nomeArquivoUsuario + ";" +
+            emailArquivo + ";" +
+            senhaArquivo + ";" +
+            cpfArquivo + ";" +
+            respostaArquivo
+        );
+    }
+
+    if (!encontrou) {
+        throw std::runtime_error("Usuario nao encontrado no arquivo.");
+    }
+
+    std::ofstream saida(nomeArquivo);
+
+    if (!saida.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
+    }
+
+    for (const std::string& l : linhas) {
+        saida << l << "\n";
+
+        if (!saida.good()) {
+            throw std::runtime_error("Erro ao escrever dados no arquivo usuarios.txt.");
+        }
+    }
+
+    _email = novoEmail;
+}
+
+void Usuario::alterarSenha(std::string novaSenha,
+                           const std::string& nomeArquivo) {
+    if (!gerenciarSenha(novaSenha)) {
+        throw std::invalid_argument("Senha invalida.");
+    }
+
+    std::ifstream entrada(nomeArquivo);
+
+    if (!entrada.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
+    }
+
+    std::vector<std::string> linhas;
+    std::string linha;
+    bool encontrou = false;
+
+    while (std::getline(entrada, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(linha);
+
+        std::string tipo;
+        std::string nomeArquivoUsuario;
+        std::string emailArquivo;
+        std::string senhaArquivo;
+        std::string cpfArquivo;
+        std::string respostaArquivo;
+
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nomeArquivoUsuario, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senhaArquivo, ';') ||
+            !std::getline(ss, cpfArquivo, ';') ||
+            !std::getline(ss, respostaArquivo, ';')) {
+
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
+
+        if (emailArquivo == _email) {
+            senhaArquivo = novaSenha;
+            encontrou = true;
+        }
+
+        linhas.push_back(
+            tipo + ";" +
+            nomeArquivoUsuario + ";" +
+            emailArquivo + ";" +
+            senhaArquivo + ";" +
+            cpfArquivo + ";" +
+            respostaArquivo
+        );
+    }
+
+    if (!encontrou) {
+        throw std::runtime_error("Usuario nao encontrado no arquivo.");
+    }
+
+    std::ofstream saida(nomeArquivo);
+
+    if (!saida.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
+    }
+
+    for (const std::string& l : linhas) {
+        saida << l << "\n";
+
+        if (!saida.good()) {
+            throw std::runtime_error("Erro ao escrever dados no arquivo usuarios.txt.");
+        }
+    }
+
+    _senha = novaSenha;
 }
 
 bool Usuario::permitirAlteracaoDados() const {
@@ -88,7 +386,7 @@ bool Usuario::autenticar(std::string email,
 }
 
 std::string Usuario::getPerguntaSeguranca() {
-    return "Qual foi a primeira escola que você estudou?";
+    return "Qual foi a primeira escola que voce estudou?";
 }
 
 bool Usuario::emailJaCadastrado(
@@ -97,9 +395,16 @@ bool Usuario::emailJaCadastrado(
 
     std::ifstream arquivo(nomeArquivo);
 
+    if (!arquivo.is_open()) {
+        return false;
+    }
+
     std::string linha;
 
     while (std::getline(arquivo, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
 
         std::stringstream ss(linha);
 
@@ -110,12 +415,15 @@ bool Usuario::emailJaCadastrado(
         std::string cpf;
         std::string resposta;
 
-        std::getline(ss, tipo, ';');
-        std::getline(ss, nome, ';');
-        std::getline(ss, emailArquivo, ';');
-        std::getline(ss, senha, ';');
-        std::getline(ss, cpf, ';');
-        std::getline(ss, resposta, ';');
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nome, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senha, ';') ||
+            !std::getline(ss, cpf, ';') ||
+            !std::getline(ss, resposta, ';')) {
+
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
 
         if (emailArquivo == email) {
             return true;
@@ -132,9 +440,16 @@ std::string Usuario::fazerLogin(
 
     std::ifstream arquivo(nomeArquivo);
 
+    if (!arquivo.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
+    }
+
     std::string linha;
 
     while (std::getline(arquivo, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
 
         std::stringstream ss(linha);
 
@@ -145,12 +460,15 @@ std::string Usuario::fazerLogin(
         std::string cpf;
         std::string resposta;
 
-        std::getline(ss, tipo, ';');
-        std::getline(ss, nome, ';');
-        std::getline(ss, emailArquivo, ';');
-        std::getline(ss, senhaArquivo, ';');
-        std::getline(ss, cpf, ';');
-        std::getline(ss, resposta, ';');
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nome, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senhaArquivo, ';') ||
+            !std::getline(ss, cpf, ';') ||
+            !std::getline(ss, resposta, ';')) {
+
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
 
         if (emailArquivo == email &&
             senhaArquivo == senha) {
@@ -171,18 +489,24 @@ bool Usuario::salvarUsuario(
         const std::string& respostaSeguranca,
         const std::string& nomeArquivo) {
 
-    if (emailJaCadastrado(email,
-                          nomeArquivo)) {
+    Usuario usuario(nome, email, senha, tipo, respostaSeguranca);
 
+    if (cpf.empty()) {
+        throw std::invalid_argument("CPF invalido.");
+    }
+
+    if (cpf.find(';') != std::string::npos) {
+        throw std::invalid_argument("CPF nao pode conter ponto e virgula.");
+    }
+
+    if (emailJaCadastrado(email, nomeArquivo)) {
         return false;
     }
 
-    std::ofstream arquivo(
-        nomeArquivo,
-        std::ios::app);
+    std::ofstream arquivo(nomeArquivo, std::ios::app);
 
     if (!arquivo.is_open()) {
-        return false;
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
     }
 
     arquivo << tipo << ";"
@@ -193,6 +517,10 @@ bool Usuario::salvarUsuario(
             << respostaSeguranca
             << "\n";
 
+    if (!arquivo.good()) {
+        throw std::runtime_error("Erro ao escrever dados no arquivo usuarios.txt.");
+    }
+
     return true;
 }
 
@@ -202,23 +530,34 @@ bool Usuario::recuperarSenha(
         const std::string& novaSenha,
         const std::string& nomeArquivo) {
 
+    if (email.empty()) {
+        throw std::invalid_argument("Email invalido.");
+    }
+
+    if (respostaSeguranca.empty()) {
+        throw std::invalid_argument("Resposta de seguranca invalida.");
+    }
+
     if (novaSenha.size() < 6) {
-        return false;
+        throw std::invalid_argument("Nova senha invalida.");
     }
 
     std::ifstream entrada(nomeArquivo);
 
     if (!entrada.is_open()) {
-        return false;
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
     }
 
     std::vector<std::string> linhas;
-
     std::string linha;
 
-    bool encontrou = false;
+    bool encontrouEmail = false;
+    bool respostaCorreta = false;
 
     while (std::getline(entrada, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
 
         std::stringstream ss(linha);
 
@@ -229,18 +568,23 @@ bool Usuario::recuperarSenha(
         std::string cpf;
         std::string respostaArquivo;
 
-        std::getline(ss, tipo, ';');
-        std::getline(ss, nome, ';');
-        std::getline(ss, emailArquivo, ';');
-        std::getline(ss, senhaArquivo, ';');
-        std::getline(ss, cpf, ';');
-        std::getline(ss, respostaArquivo, ';');
+        if (!std::getline(ss, tipo, ';') ||
+            !std::getline(ss, nome, ';') ||
+            !std::getline(ss, emailArquivo, ';') ||
+            !std::getline(ss, senhaArquivo, ';') ||
+            !std::getline(ss, cpf, ';') ||
+            !std::getline(ss, respostaArquivo, ';')) {
 
-        if (emailArquivo == email &&
-            respostaArquivo == respostaSeguranca) {
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
 
-            senhaArquivo = novaSenha;
-            encontrou = true;
+        if (emailArquivo == email) {
+            encontrouEmail = true;
+
+            if (respostaArquivo == respostaSeguranca) {
+                senhaArquivo = novaSenha;
+                respostaCorreta = true;
+            }
         }
 
         linhas.push_back(
@@ -253,20 +597,26 @@ bool Usuario::recuperarSenha(
         );
     }
 
-    entrada.close();
+    if (!encontrouEmail) {
+        return false;
+    }
 
-    if (!encontrou) {
+    if (!respostaCorreta) {
         return false;
     }
 
     std::ofstream saida(nomeArquivo);
 
     if (!saida.is_open()) {
-        return false;
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
     }
 
-    for (const auto& l : linhas) {
+    for (const std::string& l : linhas) {
         saida << l << "\n";
+
+        if (!saida.good()) {
+            throw std::runtime_error("Erro ao escrever dados no arquivo usuarios.txt.");
+        }
     }
 
     return true;

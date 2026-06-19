@@ -1,72 +1,155 @@
-#include "doctest.h"                       
-#include "Cliente.hpp"   
+#include "doctest.h"
+#include "Cliente.hpp"
+
+#include <cstdio>
+#include <stdexcept>
 
 TEST_CASE("Teste do Cliente - Inicializacao e Casos Base") {
-    Cliente cliente("Carlos Silva", "carlos@email.com", "Senha@123", "11144477735", "Belo Horizonte");
-    
+
+    Cliente cliente(
+        "Carlos Silva",
+        "carlos@email.com",
+        "Senha@123",
+        "11144477735",
+        "Belo Horizonte");
+
     CHECK(cliente.getCpf() == "11144477735");
-    CHECK(cliente.getEndereco().empty()); 
+    CHECK(cliente.getEndereco().empty());
     CHECK(cliente.getCartoesSalvos().empty());
 }
 
 TEST_CASE("Teste de Validacao de CPF - Casos Validos e Invalidos") {
+
     SUBCASE("CPF Valido com formatacao") {
-        Cliente cliente("Ana", "ana@email.com", "123", "111.444.777-35", "Gato");
+        Cliente cliente(
+            "Ana", "ana@email.com",
+            "abc123", "111.444.777-35", "Gato");
         CHECK(cliente.validarCpf() == true);
     }
 
     SUBCASE("CPF Invalido por tamanho curto") {
-        Cliente cliente("Ana", "ana@email.com", "123", "123.456", "Gato");
+        Cliente cliente(
+            "Ana", "ana@email.com",
+            "abc123", "123.456", "Gato");
         CHECK(cliente.validarCpf() == false);
     }
 
     SUBCASE("CPF Invalido com digitos iguais") {
-        Cliente cliente("Ana", "ana@email.com", "123", "11111111111", "Gato");
+        Cliente cliente(
+            "Ana", "ana@email.com",
+            "abc123", "11111111111", "Gato");
         CHECK(cliente.validarCpf() == false);
     }
 
     SUBCASE("CPF Invalido por erro nos digitos verificadores") {
-        Cliente cliente("Ana", "ana@email.com", "123", "11144477700", "Gato");
+        Cliente cliente(
+            "Ana", "ana@email.com",
+            "abc123", "11144477700", "Gato");
         CHECK(cliente.validarCpf() == false);
     }
 }
 
 TEST_CASE("Teste do Gerenciamento de Endereco Unico e Troca") {
-    Cliente cliente("Carlos", "carlos@email.com", "123", "11144477735", "BH");
-   
-    cliente.adicionarEndereco("Rua das Flores, 123, Belo Horizonte, MG");
-    CHECK(cliente.getEndereco() == "Rua das Flores, 123, Belo Horizonte, MG");
-   
-    cliente.adicionarEndereco("Av. Paulista, 1000, Sao Paulo, SP");
-    CHECK(cliente.getEndereco() == "Av. Paulista, 1000, Sao Paulo, SP"); 
+
+    Cliente cliente(
+        "Carlos", "carlos@email.com",
+        "abc123", "11144477735", "BH");
+
+    cliente.adicionarEndereco(
+        "Rua das Flores, 123, Belo Horizonte, MG");
+
+    CHECK(cliente.getEndereco() ==
+          "Rua das Flores, 123, Belo Horizonte, MG");
+
+    cliente.adicionarEndereco(
+        "Av. Paulista, 1000, Sao Paulo, SP");
+
+    CHECK(cliente.getEndereco() ==
+          "Av. Paulista, 1000, Sao Paulo, SP");
+}
+
+TEST_CASE("Teste de Endereco Invalido") {
+
+    Cliente cliente(
+        "Carlos", "carlos@email.com",
+        "abc123", "11144477735", "BH");
+
+    CHECK_THROWS_AS(
+        cliente.adicionarEndereco(""),
+        std::invalid_argument);
+
+    CHECK_THROWS_AS(
+        cliente.adicionarEndereco("Rua;Invalida"),
+        std::invalid_argument);
 }
 
 TEST_CASE("Teste de Validacao e Salvamento de Cartao (Algoritmo de Luhn)") {
-    Cliente cliente("Carlos", "carlos@email.com", "123", "11144477735", "BH");
+
+    Cliente cliente(
+        "Carlos", "carlos@email.com",
+        "abc123", "11144477735", "BH");
 
     SUBCASE("Tentativa de salvar cartao invalido") {
-        cliente.salvarCartao("1234-5678-1234-5678", TipoCartao::CREDITO); 
+        bool resultado = cliente.salvarCartao(
+            "1234-5678-1234-5678",
+            TipoCartao::CREDITO);
+        CHECK(resultado == false);
         CHECK(cliente.getCartoesSalvos().empty());
     }
 
     SUBCASE("Salvar cartao valido") {
-        cliente.salvarCartao("49927398716", TipoCartao::CREDITO); 
+        bool resultado = cliente.salvarCartao(
+            "4532015112830366",
+            TipoCartao::CREDITO);
+        CHECK(resultado == true);
         REQUIRE(cliente.getCartoesSalvos().size() == 1);
-
-        CHECK(cliente.getCartoesSalvos()[0].numero == "49927398716");
-        CHECK(cliente.getCartoesSalvos()[0].tipo == TipoCartao::CREDITO);
+        CHECK(cliente.getCartoesSalvos()[0].numero ==
+              "4532015112830366");
+        CHECK(cliente.getCartoesSalvos()[0].tipo ==
+              TipoCartao::CREDITO);
     }
-    
+
     SUBCASE("Evitar salvar cartao duplicado") {
-        cliente.salvarCartao("49927398716", TipoCartao::CREDITO);
-        cliente.salvarCartao("49927398716", TipoCartao::DEBITO);
-        
+        cliente.salvarCartao(
+            "4532015112830366", TipoCartao::CREDITO);
+        bool resultado = cliente.salvarCartao(
+            "4532015112830366", TipoCartao::DEBITO);
+        CHECK(resultado == false);
         CHECK(cliente.getCartoesSalvos().size() == 1);
+    }
+
+    SUBCASE("Numero de cartao vazio lanca excecao") {
+        CHECK_THROWS_AS(
+            cliente.salvarCartao("", TipoCartao::CREDITO),
+            std::invalid_argument);
     }
 }
 
 TEST_CASE("Teste do Fluxo de Cadastro Completo") {
-    Cliente cliente("Carlos", "carlos@email.com", "123", "11144477735", "BH");
-    
+
+    std::remove("usuarios_teste.txt");
+
+    Cliente cliente(
+        "Carlos",
+        "carlos@email.com",
+        "Senha123",
+        "11144477735",
+        "BH");
+
     CHECK(cliente.cadastrarCliente("usuarios_teste.txt") == true);
+
+    CHECK(cliente.cadastrarCliente("usuarios_teste.txt") == false);
+
+    std::remove("usuarios_teste.txt");
+}
+
+TEST_CASE("Teste de Cadastro com CPF Invalido") {
+
+    Cliente cliente(
+        "Ana", "ana@email.com",
+        "Senha123", "11111111111", "escola");
+
+    CHECK_THROWS_AS(
+        cliente.cadastrarCliente("usuarios_teste.txt"),
+        std::invalid_argument);
 }

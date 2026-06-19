@@ -7,58 +7,74 @@
 
 /**
  * @brief Classe gestora do inventário físico da loja.
- * Controla a disponibilidade imediata dos produtos e garante a integridade
- * entre o que é exibido no catálogo e o que realmente existe no armazém.
+ * Controla disponibilidade dos produtos e persiste o estoque em arquivo.
  */
 class Estoque {
 private:
     std::vector<Produto> _inventario;
+    std::string _nomeArquivo;
+
+    /**
+     * @brief Carrega o inventário do arquivo.
+     * Se o arquivo não existir, mantém o inventário vazio.
+     * @throw std::runtime_error se o arquivo existir mas tiver dados corrompidos.
+     */
+    void carregarEstoque();
 
 public:
     /**
-     * @brief Carrega os dados iniciais do inventário.
-     * Prepara a lista em memória antes das operações de venda começarem,
-     * permitindo consultas rápidas sem acessar o disco a todo momento.
+     * @brief Carrega o inventário do arquivo. Se não existir,
+     * inicializa com produtos padrão e salva o arquivo.
+     * @param nomeArquivo Caminho do arquivo de estoque.
      */
-    Estoque();
+    explicit Estoque(
+        const std::string& nomeArquivo = "estoque.txt");
 
     /**
-     * @brief Retorna o balanço total de itens no armazém como texto.
-     * A exibição fica a cargo da classe de interface.
+     * @brief Retorna texto com todas as quantidades disponíveis.
+     * A exibição fica a cargo da classe UI.
      */
     std::string exibirQuantidadeDisponiveis() const;
 
     /**
-     * @brief Retorna alertas de produtos com baixo volume de unidades.
-     * A exibição fica a cargo da classe de interface.
+     * @brief Retorna alertas de produtos com estoque crítico.
+     * A exibição fica a cargo da classe UI.
      */
     std::string alertarEstoqueCritico() const;
 
     /**
-     * @brief Reserva temporariamente itens para um pedido em andamento.
-     * Garante que o produto não seja vendido para outro cliente enquanto 
-     * o pagamento está sendo processado. 
-     * @param idProduto Identificador único do item a ser reservado.
-     * @param quantidade Número de unidades que devem ser "congeladas".
+     * @brief Valida se há estoque suficiente para a reserva.
+     * @param idProduto ID do produto a reservar.
+     * @param quantidade Unidades a reservar.
+     * @throw std::invalid_argument se quantidade <= 0.
+     * @throw std::runtime_error se produto não encontrado ou estoque insuficiente.
      */
     void congelarQuantidades(int idProduto, int quantidade);
 
     /**
-     * @brief Consolida a saída definitiva de um produto após o pagamento.
-     * Atualiza o estado interno do objeto para que a nova quantidade 
-     * seja gravada posteriormente no arquivo .txt.
-     * @param idProduto Identificador do item vendido.
-     * @param quantidade Quantidade exata a ser debitada do estoque.
+     * @brief Debita o estoque após pagamento confirmado e salva no arquivo.
+     * @param idProduto ID do produto vendido.
+     * @param quantidade Unidades a debitar.
+     * @throw std::invalid_argument se quantidade <= 0.
+     * @throw std::runtime_error se produto não encontrado ou estoque insuficiente.
      */
     void efetuarSubtracao(int idProduto, int quantidade);
 
     /**
-     * @brief Bloqueia tentativas de compra que excedam o estoque real.
-     * @param idProduto Identificador do produto alvo.
-     * @param quantidadeDesejada Volume que o cliente tenta adicionar ao carrinho.
-     * @return true se a operação é segura e permitida pelo estoque atual.
+     * @brief Verifica se há estoque suficiente para a compra.
+     * @param idProduto ID do produto.
+     * @param quantidadeDesejada Unidades desejadas.
+     * @return true se o estoque permitir a compra.
      */
-    bool impedirVendasAcimaMaximo(int idProduto, int quantidadeDesejada) const;
+    bool impedirVendasAcimaMaximo(
+        int idProduto,
+        int quantidadeDesejada) const;
+
+    /**
+     * @brief Salva o inventário atual no arquivo.
+     * @throw std::runtime_error se o arquivo não puder ser aberto.
+     */
+    void salvarEstoque() const;
 };
 
-#endif // ESTOQUE_HPP
+#endif
