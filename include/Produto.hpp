@@ -51,12 +51,11 @@ public:
     void setPreco(float novoPreco);
 
     /**
-     * @brief Debita uma quantidade do estoque após uma venda.
-     * @param quantidadeVendida Número de unidades que saíram para o carrinho.
-     * @throws std::invalid_argument se a quantidade vendida for menor ou igual a zero.
-     * @throws std::out_of_range se a quantidade solicitada for maior que o estoque atual.
+     * @brief Debita uma quantidade do estoque do produto.
+     * @param quantidadeVendida Quantidade a ser subtraída.
+     * @return true se o débito for feito com sucesso, false se não houver estoque suficiente ou a quantidade for inválida.
      */
-    void debitarEstoque(int quantidadeVendida);
+    bool debitarEstoque(int quantidadeVendida);
 
     /**
      * @brief Adiciona novas unidades ao estoque existente.

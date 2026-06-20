@@ -35,12 +35,14 @@ TEST_CASE("Testando a classe Produto - Fluxo Completo com Excecoes") {
 
         CHECK_THROWS_AS(p.adicionarEstoque(-2), std::invalid_argument);
         CHECK(p.getQuantidadeEstoque() == 15); 
-        CHECK_NOTHROW(p.debitarEstoque(5));
+
+        CHECK(p.debitarEstoque(5) == true);
         CHECK(p.getQuantidadeEstoque() == 10);
 
-        CHECK_THROWS_AS(p.debitarEstoque(20), std::out_of_range);
+        CHECK(p.debitarEstoque(20) == false);
         CHECK(p.getQuantidadeEstoque() == 10);
 
-        CHECK_THROWS_AS(p.debitarEstoque(-5), std::invalid_argument);
+        CHECK(p.debitarEstoque(-5) == false);
+        CHECK(p.getQuantidadeEstoque() == 10);
     }
 }

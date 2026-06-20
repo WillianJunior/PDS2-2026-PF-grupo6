@@ -33,14 +33,16 @@ void Produto::setPreco(float novoPreco) {
     _preco = novoPreco;
 }
 
-void Produto::debitarEstoque(int quantidadeVendida) {
+bool Produto::debitarEstoque(int quantidadeVendida) {
     if (quantidadeVendida <= 0) {
-        throw std::invalid_argument("Erro: A quantidade a ser debitada deve ser maior que zero.");
+        return false;
     }
     if (quantidadeVendida > _quantidadeEstoque) {
-        throw std::out_of_range("Erro: Estoque insuficiente para realizar o débito.");
+        return false;
     }
+    
     _quantidadeEstoque -= quantidadeVendida;
+    return true;
 }
 
 void Produto::adicionarEstoque(int quantidadeRecebida) {
