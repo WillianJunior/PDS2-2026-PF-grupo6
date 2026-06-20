@@ -23,7 +23,7 @@ private:
 
 public:
     
-    /**git helpinclude/Produto.cppgit add test
+    /** 
      * @brief Construtor da classe Produto.
      * @param id Identificador único do produto.
      * @param nome Nome de exibição do produto.
