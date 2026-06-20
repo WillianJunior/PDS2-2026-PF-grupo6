@@ -23,7 +23,7 @@ private:
 
 public:
     
-    /**
+    /** 
      * @brief Construtor da classe Produto.
      * @param id Identificador único do produto.
      * @param nome Nome de exibição do produto.
@@ -31,11 +31,10 @@ public:
      * @param preco Valor de venda (deve ser maior que zero).
      * @param quantidadeEstoque Unidades disponíveis inicialmente.
      * @param categoria A categoria literária do livro.
+     * @throws std::invalid_argument se o preço for menor ou igual a zero, ou o estoque for negativo.
      */
-
     Produto(int id, const std::string& nome, const std::string& descricao, 
             float preco, int quantidadeEstoque, CategoriaProduto categoria);
-
     
     int getId() const;
     const std::string& getNome() const;
@@ -47,20 +46,21 @@ public:
     /**
      * @brief Atualiza o preço do produto (apenas se for maior que zero).
      * @param novoPreco O novo valor de venda solicitado.
-     * @return true se o preço for maior que zero e a alteração for concluída, false caso contrário.
+     * @throws std::invalid_argument se o novo preço for menor ou igual a zero.
      */
-    bool setPreco(float novoPreco);
+    void setPreco(float novoPreco);
 
     /**
-     * @brief Debita uma quantidade do estoque após uma venda.
-     * @param quantidadeVendida Número de unidades que saíram para o carrinho.
-     * @return true se o débito foi feito com sucesso, false se faltar estoque.
+     * @brief Debita uma quantidade do estoque do produto.
+     * @param quantidadeVendida Quantidade a ser subtraída.
+     * @return true se o débito for feito com sucesso, false se não houver estoque suficiente ou a quantidade for inválida.
      */
     bool debitarEstoque(int quantidadeVendida);
 
     /**
      * @brief Adiciona novas unidades ao estoque existente.
      * @param quantidadeRecebida Número de unidades recém-chegadas ao armazém.
+     * @throws std::invalid_argument se a quantidade recebida for menor ou igual a zero.
      */
     void adicionarEstoque(int quantidadeRecebida);
 };

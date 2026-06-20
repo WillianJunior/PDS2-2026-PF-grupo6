@@ -105,6 +105,14 @@ void Catalogo::listarProdutosCategoria(
         case CategoriaProduto::Romance:
             categoriaTexto = "Romance";
             break;
+            
+        case CategoriaProduto::Suspense:
+            categoriaTexto = "Suspense";
+            break;
+
+        case CategoriaProduto::Fantasia:
+            categoriaTexto = "Fantasia";
+            break;
     }
 
     std::ifstream arquivo("catalogo.txt");
