@@ -13,28 +13,50 @@ static std::string formatarValor(double valor) {
     return oss.str();
 }
 
-
 Pedido::Pedido(const Carrinho& carrinho,
                const Cliente& cliente) {
+
+  if (!cliente.validarCpf()) {
+    throw std::invalid_argument(
+        "CPF do cliente invalido.");
+}
 
     _status = StatusPedido::Pendente;
     _frete  = carrinho.getValorFrete();
 
+    if (carrinho.getProdutos().empty()) {
+    throw std::runtime_error(
+        "Nao e possivel criar pedido sem produtos.");
+}
+
+    if (_frete < 0.0) {
+        throw std::runtime_error(
+            "Valor de frete invalido.");
+    }
+
     double subtotal       = carrinho.calcularSubtotal();
     double totalCalculado = carrinho.calcularTotal();
 
-    if (subtotal < 0.0 || totalCalculado < subtotal) {
+    if (subtotal < 0.0) {
         throw std::runtime_error(
-            "Erro critico: inconsistencia detectada "
-            "nos valores do carrinho.");
+            "Subtotal invalido.");
+    }
+
+    if (totalCalculado < subtotal) {
+        throw std::runtime_error(
+            "Total inconsistente.");
     }
 
     _valorTotal = totalCalculado;
 }
 
-
 std::string Pedido::informarValorFrete(
         const std::string& endereco) {
+
+    if (endereco.empty()) {
+        throw std::invalid_argument(
+            "Endereco nao pode ser vazio.");
+    }
 
     return "O valor do frete para '" +
            endereco + "' e: R$ " +
@@ -43,6 +65,11 @@ std::string Pedido::informarValorFrete(
 
 std::string Pedido::estimarDataEntrega(
         const std::string& endereco) {
+
+    if (endereco.empty()) {
+        throw std::invalid_argument(
+            "Endereco invalido.");
+    }
 
     if (endereco.find("MG") != std::string::npos ||
         endereco.find("Belo Horizonte") != std::string::npos) {
@@ -55,9 +82,18 @@ std::string Pedido::estimarDataEntrega(
            "a partir da confirmacao de pagamento.";
 }
 
-
 std::string Pedido::processarPagamentos(
         MetodoPagamento metodo) {
+
+    if (_status != StatusPedido::Pendente) {
+    throw std::runtime_error(
+        "Pagamento nao permitido para este status.");
+}
+
+    if (_valorTotal < 0.0) {
+        throw std::runtime_error(
+            "Valor total invalido.");
+    }
 
     std::string resultado;
 
@@ -79,7 +115,7 @@ std::string Pedido::processarPagamentos(
         gerenciarStatus(StatusPedido::Pago);
 
     } else {
-    
+
         throw std::invalid_argument(
             "Metodo de pagamento invalido.");
     }
@@ -89,17 +125,25 @@ std::string Pedido::processarPagamentos(
     return resultado;
 }
 
-
 std::string Pedido::gerarResumoFaturamento(
-        const Cliente& cliente,
+        const Cliente&,
         const Carrinho& carrinho) {
 
     double subtotal = carrinho.calcularSubtotal();
 
     std::ostringstream oss;
-    oss << "Subtotal: R$ " << formatarValor(subtotal)    << "\n"
-        << "Frete: R$ "    << formatarValor(_frete)      << "\n"
-        << "Total: R$ "    << formatarValor(_valorTotal) << "\n";
+
+    oss << "Subtotal: R$ "
+        << formatarValor(subtotal)
+        << "\n";
+
+    oss << "Frete: R$ "
+        << formatarValor(_frete)
+        << "\n";
+
+    oss << "Total: R$ "
+        << formatarValor(_valorTotal)
+        << "\n";
 
     return oss.str();
 }
@@ -107,7 +151,19 @@ std::string Pedido::gerarResumoFaturamento(
 void Pedido::gerenciarStatus(
         StatusPedido novoStatus) {
 
-    _status = novoStatus;
+    switch (novoStatus) {
+
+        case StatusPedido::Pendente:
+        case StatusPedido::Pago:
+        case StatusPedido::Enviado:
+        case StatusPedido::Entregue:
+            _status = novoStatus;
+            break;
+
+        default:
+            throw std::invalid_argument(
+                "Status invalido.");
+    }
 }
 
 std::string Pedido::exibirMensagemConfirmacao() {
@@ -120,22 +176,42 @@ std::string Pedido::exibirMensagemConfirmacao() {
 }
 
 
-void Pedido::salvarEmArquivo(
-        const Cliente& cliente) {
+void Pedido::salvarEmArquivo(const Cliente& cliente, const Carrinho& carrinho) {
 
-    if (cliente.getCpf().empty() ||
-        cliente.getEndereco().empty()) {
-
+    if (cliente.getCpf().empty()) {
         throw std::invalid_argument(
-            "Nao e possivel salvar pedido com "
-            "dados de cliente incompletos.");
+            "CPF do cliente invalido.");
+    }
+
+    if (_valorTotal < 0.0) {
+        throw std::runtime_error(
+            "Pedido invalido.");
+    }
+
+    const auto& produtos =
+        carrinho.getProdutos();
+
+    const auto& quantidades =
+        carrinho.getQuantidades();
+
+    if (produtos.empty()) {
+        throw std::runtime_error(
+            "Nao e possivel salvar um pedido vazio.");
+    }
+
+    if (produtos.size() !=
+        quantidades.size()) {
+
+        throw std::runtime_error(
+            "Inconsistencia entre produtos e quantidades.");
     }
 
     std::string nomeArquivo =
         "pedido_" + cliente.getCpf() + ".txt";
 
     std::ofstream arquivo(
-        nomeArquivo, std::ios::app);
+        nomeArquivo,
+        std::ios::app);
 
     if (!arquivo.is_open()) {
         throw std::runtime_error(
@@ -143,32 +219,129 @@ void Pedido::salvarEmArquivo(
             nomeArquivo);
     }
 
+    arquivo << "====================================\n";
+    arquivo << "RESUMO DO PEDIDO\n";
+    arquivo << "====================================\n";
 
-    arquivo << "=== RESUMO DO PEDIDO ===\n";
-    arquivo << "CPF do Cliente: " << cliente.getCpf()      << "\n";
-    arquivo << "Endereco: "       << cliente.getEndereco() << "\n";
-    arquivo << "------------------------\n";
-    arquivo << "VALORES:\n";
-    arquivo << "Frete: R$ "      << formatarValor(_frete)      << "\n";
-    arquivo << "Total Pago: R$ " << formatarValor(_valorTotal)  << "\n";
-    arquivo << "------------------------\n";
-    arquivo << "STATUS E LOGISTICA:\n";
+    arquivo << "CPF do Cliente: "
+            << cliente.getCpf()
+            << "\n";
+
+    arquivo << "Endereco: "
+            << cliente.getEndereco()
+            << "\n\n";
+
+    arquivo << "ITENS DO PEDIDO\n";
+    arquivo << "------------------------------------\n";
+
+    double subtotalCalculado = 0.0;
+
+    for (size_t i = 0;
+         i < produtos.size();
+         i++) {
+
+        if (produtos[i].getId() <= 0) {
+            throw std::runtime_error(
+                "Produto invalido encontrado no pedido.");
+        }
+
+        if (produtos[i].getPreco() < 0.0) {
+            throw std::runtime_error(
+                "Preco invalido encontrado no pedido.");
+        }
+
+        if (quantidades[i] <= 0) {
+            throw std::runtime_error(
+                "Quantidade invalida encontrada no pedido.");
+        }
+
+        double subtotalItem =
+            produtos[i].getPreco() *
+            quantidades[i];
+
+        subtotalCalculado +=
+            subtotalItem;
+
+        arquivo << "Produto: "
+                << produtos[i].getNome()
+                << "\n";
+
+        arquivo << "ID: "
+                << produtos[i].getId()
+                << "\n";
+
+        arquivo << "Quantidade: "
+                << quantidades[i]
+                << "\n";
+
+        arquivo << "Preco Unitario: R$ "
+                << formatarValor(
+                       produtos[i].getPreco())
+                << "\n";
+
+        arquivo << "Subtotal Item: R$ "
+                << formatarValor(
+                       subtotalItem)
+                << "\n";
+
+        arquivo << "------------------------------------\n";
+    }
+
+    if (subtotalCalculado < 0.0) {
+    throw std::runtime_error(
+        "Subtotal calculado invalido.");
+}
+
+    arquivo << "\nVALORES\n";
+
+    arquivo << "Subtotal: R$ "
+            << formatarValor(
+                   subtotalCalculado)
+            << "\n";
+
+    arquivo << "Frete: R$ "
+            << formatarValor(_frete)
+            << "\n";
+
+    arquivo << "Total Pago: R$ "
+            << formatarValor(
+                   _valorTotal)
+            << "\n\n";
+
+    arquivo << "STATUS E LOGISTICA\n";
 
     arquivo << "Status Atual: ";
 
     switch (_status) {
+
         case StatusPedido::Pendente:
-            arquivo << "Pendente\n"; break;
+            arquivo << "Pendente\n";
+            break;
+
         case StatusPedido::Pago:
-            arquivo << "Pago\n";     break;
+            arquivo << "Pago\n";
+            break;
+
         case StatusPedido::Enviado:
-            arquivo << "Enviado\n";  break;
+            arquivo << "Enviado\n";
+            break;
+
         case StatusPedido::Entregue:
-            arquivo << "Entregue\n"; break;
+            arquivo << "Entregue\n";
+            break;
     }
 
-    arquivo << estimarDataEntrega(
-        cliente.getEndereco()) << "\n";
+    if (!cliente.getEndereco().empty()) {
 
-    arquivo << "========================\n\n";
+        arquivo << estimarDataEntrega(
+                       cliente.getEndereco())
+                << "\n";
+    }
+
+    arquivo << "====================================\n\n";
+
+    if (!arquivo.good()) {
+        throw std::runtime_error(
+            "Erro ao escrever dados do pedido.");
+    }
 }

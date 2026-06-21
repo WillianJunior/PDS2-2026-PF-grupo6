@@ -84,7 +84,7 @@ public:
      * @throws std::invalid_argument se dados do cliente estiverem incompletos.
      * @throws std::runtime_error se o arquivo não puder ser aberto.
      */
-    void salvarEmArquivo(const Cliente& cliente);
+    void salvarEmArquivo(const Cliente& cliente, const Carrinho& carrinho);
 
     StatusPedido getStatus()    const { return _status;     }
     double getValorTotal()      const { return _valorTotal; }

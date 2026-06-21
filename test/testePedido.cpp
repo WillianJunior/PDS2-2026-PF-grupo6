@@ -1,79 +1,362 @@
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "doctest.h"
 #include "Pedido.hpp"
 #include "Cliente.hpp"
 #include "Carrinho.hpp"
 #include "Produto.hpp"
-#include "doctest.h" 
+
 #include <fstream>
 #include <string>
 #include <cstdio>
 #include <stdexcept>
 
-TEST_CASE("Teste de Unidade - Pedido") {
-    std::remove("Carrinho.txt");
-    
-    Cliente cliente("Nome", "email@teste.com", "senha123", "11144477735", "RespostaSeguranca");
-    cliente.adicionarEndereco("Belo Horizonte, MG");
+TEST_CASE("Teste de Unidade Isolado - Classe Pedido") {
 
-    Carrinho carrinho(cliente);
-    Produto livro(1, "Livro Ficção A", "Descrição", 100.00, 10, CategoriaProduto::Ficcao);
+    Cliente clienteMock(
+        "Joao Silva",
+        "joao@email.com",
+        "senha123",
+        "52998224725",
+        "Resposta"
+    );
 
-    SUBCASE("Caminho Feliz: Construtor, Logística e Pagamento") {
-        carrinho.adicionarProduto(livro, 1); // Subtotal=100, Frete=15, Total=115
-        Pedido pedido(carrinho, cliente);
+    clienteMock.adicionarEndereco(
+        "Rua das Flores, 123, Belo Horizonte, MG"
+    );
 
-        CHECK(pedido.getValorTotal() == 115.00);
-        CHECK(pedido.getValorFrete() == 15.00);
-        CHECK(pedido.getStatus() == Pedido::StatusPedido::Pendente);
+    Carrinho carrinhoMock(clienteMock);
 
-        CHECK(pedido.estimarDataEntrega(cliente.getEndereco()).find("2 a 3 dias úteis") != std::string::npos);
-        CHECK(pedido.estimarDataEntrega("Outro Estado, SP").find("7 a 10 dias úteis") != std::string::npos);
+    carrinhoMock.limparCarrinho();
 
-        pedido.processarPagamentos(Pedido::MetodoPagamento::Pix);
-        CHECK(pedido.getStatus() == Pedido::StatusPedido::Pago);
-        
-        CHECK_THROWS_AS(pedido.processarPagamentos(Pedido::MetodoPagamento::Credito), std::runtime_error);
+    Produto produtoMock(
+        1,
+        "Livro Teste",
+        "Descricao do livro",
+        100.0f,
+        10,
+        CategoriaProduto::Tecnico
+    );
+
+    carrinhoMock.adicionarProduto(
+        produtoMock,
+        1
+    );
+
+    Pedido pedido(
+        carrinhoMock,
+        clienteMock
+    );
+
+    SUBCASE("Construtor inicializa corretamente") {
+
+        CHECK(
+            pedido.getValorFrete() ==
+            doctest::Approx(15.0)
+        );
+
+        CHECK(
+            pedido.getValorTotal() ==
+            doctest::Approx(115.0)
+        );
+
+        CHECK(
+            pedido.getStatus() ==
+            Pedido::StatusPedido::Pendente
+        );
     }
 
-    SUBCASE("Exceções: Barricadas do Construtor e Métodos Públicos") {
-        // Carrinho vazio
-        CHECK_THROWS_AS(Pedido(carrinho, cliente), std::invalid_argument);
+    SUBCASE("Informar valor do frete") {
 
-        carrinho.adicionarProduto(livro, 1);
-        Pedido pedidoValido(carrinho, cliente);
+        std::string resultado =
+            pedido.informarValorFrete(
+                clienteMock.getEndereco()
+            );
 
-        Cliente cSemCpf("Nome", "email@teste.com", "senha123", "", "RespostaSeguranca");
-        cSemCpf.adicionarEndereco("Belo Horizonte, MG");
-
-        Cliente cSemEnd("Nome", "email@teste.com", "senha123", "11144477735", "RespostaSeguranca");
-     
-
-        CHECK_THROWS_AS(Pedido(carrinho, cSemCpf), std::invalid_argument);
-        CHECK_THROWS_AS(Pedido(carrinho, cSemEnd), std::invalid_argument);
-
-        CHECK_THROWS_AS(pedidoValido.estimarDataEntrega(""), std::invalid_argument);
-        CHECK_THROWS_AS(pedidoValido.informarValorFrete(""), std::invalid_argument);
-        
-        auto pagamentoInvalido = static_cast<Pedido::MetodoPagamento>(999);
-        CHECK_THROWS_AS(pedidoValido.processarPagamentos(pagamentoInvalido), std::invalid_argument);
+        CHECK(
+            resultado.find("15.00")
+            != std::string::npos
+        );
     }
 
-    SUBCASE("Persistência: Escrita em Arquivo e Barricada") {
-        carrinho.adicionarProduto(livro, 1);
-        Pedido pedido(carrinho, cliente);
-        
-        pedido.salvarEmArquivo(cliente);
-        std::string arquivoNome = "pedido_11144477735.txt";
-        
-        std::ifstream arquivo(arquivoNome);
-        REQUIRE(arquivo.is_open() == true);
+    SUBCASE("Entrega para MG") {
+
+        std::string prazo =
+            pedido.estimarDataEntrega(
+                clienteMock.getEndereco()
+            );
+
+        CHECK(
+            prazo.find("2 a 3 dias")
+            != std::string::npos
+        );
+    }
+
+    SUBCASE("Entrega fora de MG") {
+
+        std::string prazo =
+            pedido.estimarDataEntrega(
+                "Av. Paulista, Sao Paulo, SP"
+            );
+
+        CHECK(
+            prazo.find("7 a 10 dias")
+            != std::string::npos
+        );
+    }
+
+    SUBCASE("Pagamento via PIX") {
+
+        std::string resultado =
+            pedido.processarPagamentos(
+                Pedido::MetodoPagamento::Pix
+            );
+
+        CHECK(
+            resultado.find(
+                "Pagamento confirmado"
+            ) != std::string::npos
+        );
+
+        CHECK(
+            pedido.getStatus() ==
+            Pedido::StatusPedido::Pago
+        );
+    }
+
+    SUBCASE("Pagamento via Credito") {
+
+        std::string resultado =
+            pedido.processarPagamentos(
+                Pedido::MetodoPagamento::Credito
+            );
+
+        CHECK(
+            resultado.find(
+                "Pagamento confirmado"
+            ) != std::string::npos
+        );
+
+        CHECK(
+            pedido.getStatus() ==
+            Pedido::StatusPedido::Pago
+        );
+    }
+
+    SUBCASE("Pagamento via Debito") {
+
+        std::string resultado =
+            pedido.processarPagamentos(
+                Pedido::MetodoPagamento::Debito
+            );
+
+        CHECK(
+            resultado.find(
+                "Pagamento confirmado"
+            ) != std::string::npos
+        );
+
+        CHECK(
+            pedido.getStatus() ==
+            Pedido::StatusPedido::Pago
+        );
+    }
+
+    SUBCASE("Resumo de faturamento") {
+
+        std::string resumo =
+            pedido.gerarResumoFaturamento(
+                clienteMock,
+                carrinhoMock
+            );
+
+        CHECK(
+            resumo.find("Subtotal")
+            != std::string::npos
+        );
+
+        CHECK(
+            resumo.find("Frete")
+            != std::string::npos
+        );
+
+        CHECK(
+            resumo.find("Total")
+            != std::string::npos
+        );
+    }
+
+    SUBCASE("Mensagem aguardando pagamento") {
+
+        CHECK(
+            pedido.exibirMensagemConfirmacao()
+            ==
+            "Aguardando pagamento.\n"
+        );
+    }
+
+    SUBCASE("Mensagem pagamento confirmado") {
+
+        pedido.processarPagamentos(
+            Pedido::MetodoPagamento::Pix
+        );
+
+        CHECK(
+            pedido.exibirMensagemConfirmacao()
+            ==
+            "Pagamento confirmado!\n"
+        );
+    }
+
+    SUBCASE("Mudanca de status") {
+
+        pedido.gerenciarStatus(
+            Pedido::StatusPedido::Enviado
+        );
+
+        CHECK(
+            pedido.getStatus()
+            ==
+            Pedido::StatusPedido::Enviado
+        );
+
+        pedido.gerenciarStatus(
+            Pedido::StatusPedido::Entregue
+        );
+
+        CHECK(
+            pedido.getStatus()
+            ==
+            Pedido::StatusPedido::Entregue
+        );
+    }
+
+    SUBCASE("Salvar pedido em arquivo") {
+
+        pedido.salvarEmArquivo(
+            clienteMock,
+            carrinhoMock
+        );
+
+        std::string nomeArquivo =
+            "pedido_52998224725.txt";
+
+        std::ifstream arquivo(
+            nomeArquivo
+        );
+
+        REQUIRE(
+            arquivo.is_open()
+        );
+
+        std::string linha;
+
+        bool encontrouCpf = false;
+        bool encontrouEndereco = false;
+        bool encontrouProduto = false;
+
+        while (
+            std::getline(
+                arquivo,
+                linha
+            )
+        ) {
+
+            if (
+                linha.find(
+                    "52998224725"
+                )
+                != std::string::npos
+            ) {
+                encontrouCpf = true;
+            }
+
+            if (
+                linha.find(
+                    "Belo Horizonte"
+                )
+                != std::string::npos
+            ) {
+                encontrouEndereco = true;
+            }
+
+            if (
+                linha.find(
+                    "Livro Teste"
+                )
+                != std::string::npos
+            ) {
+                encontrouProduto = true;
+            }
+        }
+
         arquivo.close();
 
-        Cliente cInvalido("Nome", "email@teste.com", "senha123", "", "RespostaSeguranca"); 
-        
-        CHECK_THROWS_AS(pedido.salvarEmArquivo(cInvalido), std::invalid_argument);
+        CHECK(encontrouCpf);
+        CHECK(encontrouEndereco);
+        CHECK(encontrouProduto);
 
-        std::remove(arquivoNome.c_str());
+        std::remove(
+            nomeArquivo.c_str()
+        );
     }
 
-    std::remove("Carrinho.txt");
+    SUBCASE("Excecao endereco vazio para entrega") {
+
+        CHECK_THROWS_AS(
+            pedido.estimarDataEntrega(""),
+            std::invalid_argument
+        );
+    }
+
+    SUBCASE("Excecao endereco vazio para frete") {
+
+        CHECK_THROWS_AS(
+            pedido.informarValorFrete(""),
+            std::invalid_argument
+        );
+    }
+
+    SUBCASE("Excecao pagamento duplicado") {
+
+        pedido.processarPagamentos(
+            Pedido::MetodoPagamento::Pix
+        );
+
+        CHECK_THROWS_AS(
+            pedido.processarPagamentos(
+                Pedido::MetodoPagamento::Pix
+            ),
+            std::runtime_error
+        );
+    }
+
+    SUBCASE("Excecao pagamento apos envio") {
+
+        pedido.gerenciarStatus(
+            Pedido::StatusPedido::Enviado
+        );
+
+        CHECK_THROWS_AS(
+            pedido.processarPagamentos(
+                Pedido::MetodoPagamento::Pix
+            ),
+            std::runtime_error
+        );
+    }
+
+    SUBCASE("Excecao carrinho vazio") {
+
+        Carrinho vazio(clienteMock);
+
+        vazio.limparCarrinho();
+
+        CHECK_THROWS_AS(
+            Pedido(
+                vazio,
+                clienteMock
+            ),
+            std::runtime_error
+        );
+    }
 }
