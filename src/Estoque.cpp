@@ -34,12 +34,6 @@ static CategoriaProduto textoParaCategoria(
         "Categoria invalida no arquivo de estoque: " + texto);
 }
 
-static std::string formatarValor(double valor) {
-    std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << valor;
-    return oss.str();
-}
-
 
 void Estoque::carregarEstoque() {
 
@@ -155,40 +149,26 @@ Estoque::Estoque(const std::string& nomeArquivo)
 }
 
 
-std::string Estoque::exibirQuantidadeDisponiveis() const {
-
-    std::string resultado;
-
-    for (const Produto& p : _inventario) {
-
-        resultado += p.getNome() + ": " +
-                     std::to_string(p.getQuantidadeEstoque()) +
-                     " unidades\n";
-    }
-
-    return resultado;
+std::vector<Produto> Estoque::obterInventario() const {
+    return _inventario;
 }
 
-std::string Estoque::alertarEstoqueCritico() const {
-
-    std::string alertas;
-
+std::vector<Produto> Estoque::obterProdutosEmAlerta() const {
+    std::vector<Produto> produtosEmAlerta;
+    
     for (const Produto& p : _inventario) {
-
         if (p.getQuantidadeEstoque() < 5) {
-
-            alertas += "ALERTA: " + p.getNome() +
-                       " com estoque critico!\n";
+            produtosEmAlerta.push_back(p);
         }
     }
-
-    return alertas;
+    
+    return produtosEmAlerta;
 }
 
 
 void Estoque::congelarQuantidades(
         int idProduto,
-        int quantidade) {
+        int quantidade) const {
 
     if (quantidade <= 0) {
         throw std::invalid_argument(

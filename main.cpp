@@ -1,4 +1,4 @@
-#include "UI.hpp"
+#include "Interface.hpp"
 #include "Usuario.hpp"
 #include "Cliente.hpp"
 #include "Catalogo.hpp"
@@ -20,28 +20,18 @@ static bool carregarDadosUsuario(
         std::string& resposta) {
 
     std::ifstream arquivo(ARQUIVO_USUARIOS);
-
-    if (!arquivo.is_open()) {
-        return false;
-    }
+    if (!arquivo.is_open()) return false;
 
     std::string linha;
-
     while (std::getline(arquivo, linha)) {
-
         if (linha.empty()) continue;
 
         std::stringstream ss(linha);
-
         std::string tipo, n, e, s, c, r;
 
-        if (!std::getline(ss, tipo, ';') ||
-            !std::getline(ss, n,    ';') ||
-            !std::getline(ss, e,    ';') ||
-            !std::getline(ss, s,    ';') ||
-            !std::getline(ss, c,    ';') ||
-            !std::getline(ss, r,    ';')) {
-
+        if (!std::getline(ss, tipo, ';') || !std::getline(ss, n, ';') ||
+            !std::getline(ss, e, ';') || !std::getline(ss, s, ';') ||
+            !std::getline(ss, c, ';') || !std::getline(ss, r, ';')) {
             continue;
         }
 
@@ -53,85 +43,61 @@ static bool carregarDadosUsuario(
             return true;
         }
     }
-
     return false;
 }
 
 int main() {
-
-    UI ui;
+    Interface interface_app;
     Catalogo catalogo;
     Estoque  estoque;
 
     int opcao;
 
     do {
-        ui.exibirMenuPrincipal();
-
-        opcao = ui.lerOpcao("Opcao: ");
+        interface_app.exibirMenuPrincipal();
+        opcao = interface_app.lerOpcao("Opcao: ");
 
         if (opcao == 1) {
-
-            std::string email = ui.lerTexto("Email: ");
-            std::string senha = ui.lerTexto("Senha: ");
+            std::string email = interface_app.lerTexto("Email: ");
+            std::string senha = interface_app.lerTexto("Senha: ");
 
             try {
-                std::string tipo = Usuario::fazerLogin(
-                    email, senha, ARQUIVO_USUARIOS);
+                std::string tipo = Usuario::fazerLogin(email, senha, ARQUIVO_USUARIOS);
 
                 if (tipo == "invalido") {
-                    ui.exibirErro(
-                        "Email ou senha incorretos.");
+                    interface_app.exibirErro("Email ou senha incorretos.");
                     continue;
                 }
 
                 std::string nome, senhaArq, cpf, resposta;
 
-                if (!carregarDadosUsuario(
-                        email, nome, senhaArq, cpf, resposta)) {
-
-                    ui.exibirErro(
-                        "Erro ao carregar dados do usuario.");
+                if (!carregarDadosUsuario(email, nome, senhaArq, cpf, resposta)) {
+                    interface_app.exibirErro("Erro ao carregar dados do usuario.");
                     continue;
                 }
 
                 if (tipo == "administrador") {
-
-                    ui.exibirSucesso(
-                        "Login como Administrador!");
-
-                    ui.exibirMenuAdministrador(
-                        catalogo, estoque);
-
+                    interface_app.exibirSucesso("Login como Administrador!");
+                    interface_app.exibirMenuAdministrador(catalogo, estoque);
                 } else {
-
-                    ui.exibirSucesso("Login como Cliente!");
-
-                    Cliente cliente(
-                        nome, email, senha, cpf, resposta);
-
+                    interface_app.exibirSucesso("Login como Cliente!");
+                    Cliente cliente(nome, email, senha, cpf, resposta);
                     Carrinho carrinho(cliente);
-
-                    ui.exibirMenuCliente(
-                        carrinho, catalogo, cliente);
+                    interface_app.exibirMenuCliente(carrinho, catalogo, cliente);
                 }
 
             } catch (const std::exception& e) {
-                ui.exibirErro(e.what());
+                interface_app.exibirErro(e.what());
             }
 
         } else if (opcao == 2) {
-
-            ui.telaCadastroCliente(ARQUIVO_USUARIOS);
-
+            interface_app.telaCadastroCliente(ARQUIVO_USUARIOS);
         } else if (opcao == 3) {
-
-            ui.telaRecuperacaoSenha(ARQUIVO_USUARIOS);
+            interface_app.telaRecuperacaoSenha(ARQUIVO_USUARIOS);
         }
 
     } while (opcao != 0);
 
-    std::cout << "Ate logo!\n";
-
+    std::cout << "Ate logo! :)\n";
     return 0;
 }

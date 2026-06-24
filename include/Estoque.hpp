@@ -27,20 +27,20 @@ public:
      * inicializa com produtos padrão e salva o arquivo.
      * @param nomeArquivo Caminho do arquivo de estoque.
      */
-    explicit Estoque(
-        const std::string& nomeArquivo = "estoque.txt");
+    explicit Estoque(const std::string& nomeArquivo = "estoque.txt");
 
     /**
-     * @brief Retorna texto com todas as quantidades disponíveis.
-     * A exibição fica a cargo da classe UI.
+     * @brief Retorna uma cópia do inventário atual com as quantidades.
+     * A formatação visual fica a cargo da classe Interface.
+     * @return Vetor contendo os produtos em estoque.
      */
-    std::string exibirQuantidadeDisponiveis() const;
+    std::vector<Produto> obterInventario() const;
 
     /**
-     * @brief Retorna alertas de produtos com estoque crítico.
-     * A exibição fica a cargo da classe UI.
+     * @brief Filtra e retorna apenas os produtos com estoque crítico (menos de 5 unidades).
+     * @return Vetor de produtos em estado de alerta.
      */
-    std::string alertarEstoqueCritico() const;
+    std::vector<Produto> obterProdutosEmAlerta() const;
 
     /**
      * @brief Valida se há estoque suficiente para a reserva.
@@ -49,7 +49,7 @@ public:
      * @throw std::invalid_argument se quantidade <= 0.
      * @throw std::runtime_error se produto não encontrado ou estoque insuficiente.
      */
-    void congelarQuantidades(int idProduto, int quantidade);
+    void congelarQuantidades(int idProduto, int quantidade) const;
 
     /**
      * @brief Debita o estoque após pagamento confirmado e salva no arquivo.
@@ -66,9 +66,7 @@ public:
      * @param quantidadeDesejada Unidades desejadas.
      * @return true se o estoque permitir a compra.
      */
-    bool impedirVendasAcimaMaximo(
-        int idProduto,
-        int quantidadeDesejada) const;
+    bool impedirVendasAcimaMaximo(int idProduto, int quantidadeDesejada) const;
 
     /**
      * @brief Salva o inventário atual no arquivo.

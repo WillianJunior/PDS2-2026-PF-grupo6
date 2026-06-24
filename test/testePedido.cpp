@@ -17,7 +17,7 @@ TEST_CASE("Teste de Unidade Isolado - Classe Pedido") {
         "Joao Silva",
         "joao@email.com",
         "senha123",
-        "52998224725",
+        "11144477735",
         "Resposta"
     );
 
@@ -239,7 +239,7 @@ TEST_CASE("Teste de Unidade Isolado - Classe Pedido") {
         );
 
         std::string nomeArquivo =
-            "pedido_52998224725.txt";
+            "pedido_11144477735.txt";
 
         std::ifstream arquivo(
             nomeArquivo
@@ -264,7 +264,7 @@ TEST_CASE("Teste de Unidade Isolado - Classe Pedido") {
 
             if (
                 linha.find(
-                    "52998224725"
+                    "11144477735"
                 )
                 != std::string::npos
             ) {
