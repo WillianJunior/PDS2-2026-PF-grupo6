@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
 
 void Interface::imprimirSeparador() const {
     std::cout << "========================================\n";
@@ -109,7 +110,7 @@ void Interface::telaCatalogo(Catalogo& catalogo) {
             std::cout << "1 - Ficcao\n2 - Tecnico\n3 - Infantil\n4 - Romance\n5 - Suspense\n6 - Fantasia\n";
 
             int cat = lerOpcao("Categoria: ");
-            CategoriaProduto categoria;
+            CategoriaProduto categoria = CategoriaProduto::Ficcao;
             bool categoriaValida = true;
 
             switch (cat) {
@@ -214,7 +215,6 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 
         std::cout << pedido.processarPagamentos(metodo) << "\n";
 
-        // BUGS CORRIGIDOS: Passando o carrinho como argumento exigido na assinatura
         pedido.salvarEmArquivo(cliente, carrinho);
 
         exibirSucesso("Pedido salvo com sucesso!");
@@ -230,12 +230,18 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 void Interface::telaEstoque(Estoque& estoque) {
     imprimirTitulo("GERENCIAR ESTOQUE");
 
-    std::cout << estoque.exibirQuantidadeDisponiveis();
+    std::vector<Produto> inventario = estoque.obterInventario();
+    for (const auto& p : inventario) {
+        std::cout << p.getNome() << ": " << p.getQuantidadeEstoque() << " unidades\n";
+    }
+
     imprimirSeparador();
 
-    std::string alertas = estoque.alertarEstoqueCritico();
+    std::vector<Produto> alertas = estoque.obterProdutosEmAlerta();
     if (!alertas.empty()) {
-        std::cout << alertas;
+        for (const auto& p : alertas) {
+            std::cout << "ALERTA: " << p.getNome() << " com estoque critico!\n";
+        }
     }
 }
 
