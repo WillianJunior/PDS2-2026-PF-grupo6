@@ -1,0 +1,40 @@
+1;Harry Potter e a Pedra Filosofal;Livro de fantasia sobre um jovem bruxo.;49.90;20;Fantasia
+2;O Hobbit;Aventura na Terra Média.;59.90;15;Fantasia
+3;Percy Jackson e o Ladrão de Raios;Mitologia grega em uma aventura moderna.;44.90;18;Fantasia
+4;O Nome do Vento;Fantasia épica sobre Kvothe.;69.90;12;Fantasia
+5;As Crônicas de Nárnia;Fantasia clássica.;54.90;16;Fantasia
+6;O Código Da Vinci;Mistério envolvendo símbolos religiosos.;39.90;14;Suspense
+7;A Garota no Trem;Suspense psicológico.;42.90;10;Suspense
+8;Garota Exemplar;Thriller de investigação.;46.90;8;Suspense
+9;Sherlock Holmes - Um Estudo em Vermelho;Clássico policial.;35.90;16;Suspense
+10;O Silêncio dos Inocentes;Suspense policial.;58.90;9;Suspense
+11;Dom Casmurro;Clássico brasileiro.;29.90;25;Romance
+12;Orgulho e Preconceito;Romance clássico.;34.90;20;Romance
+13;A Culpa é das Estrelas;Romance juvenil.;36.90;17;Romance
+14;Como Eu Era Antes de Você;Romance contemporâneo.;41.90;15;Romance
+15;O Morro dos Ventos Uivantes;Romance clássico.;45.90;10;Romance
+16;1984;Distopia clássica.;45.90;22;Ficcao
+17;Duna;Ficção científica espacial.;69.90;8;Ficcao
+18;Fundação;Saga de ficção científica.;62.90;9;Ficcao
+19;Neuromancer;Clássico cyberpunk.;58.90;11;Ficcao
+20;Eu, Robô;Contos de Isaac Asimov.;49.90;13;Ficcao
+21;O Pequeno Príncipe;Clássico infantil.;24.90;30;Infantil
+22;Diário de um Banana;Humor para jovens.;32.90;20;Infantil
+23;O Menino Maluquinho;Clássico infantil brasileiro.;28.90;15;Infantil
+24;Alice no País das Maravilhas;Fantasia infantil.;27.90;18;Infantil
+25;Pinóquio;Aventura infantil clássica.;26.90;16;Infantil
+26;Clean Code;Boas práticas de programação.;89.90;12;Tecnico
+27;Design Patterns;Padrões de projeto em software.;99.90;8;Tecnico
+28;Entendendo Algoritmos;Introdução aos algoritmos.;74.90;15;Tecnico
+29;Programação em C++;Conceitos de POO em C++.;79.90;11;Tecnico
+30;Arquitetura Limpa;Princípios de arquitetura de software.;92.90;9;Tecnico
+31;Código Limpo para Iniciantes;Fundamentos de programação.;65.90;14;Tecnico
+32;Estruturas de Dados;Conceitos e aplicações.;83.90;10;Tecnico
+33;Senhor dos Aneis - A Sociedade do Anel;Primeiro volume da trilogia.;79.90;10;Fantasia
+34;Senhor dos Aneis - As Duas Torres;Segundo volume da trilogia.;79.90;9;Fantasia
+35;Senhor dos Aneis - O Retorno do Rei;Terceiro volume da trilogia.;79.90;8;Fantasia
+36;Cidades de Papel;Romance juvenil.;34.90;15;Romance
+37;Quem e Voce Alaska;Romance contemporaneo.;36.90;12;Romance
+38;Assassinato no Expresso do Oriente;Suspense investigativo.;44.90;10;Suspense
+39;O Homem de Giz;Suspense psicologico.;47.90;11;Suspense
+40;Java Como Programar;Livro tecnico sobre programacao.;95.90;7;Tecnico
