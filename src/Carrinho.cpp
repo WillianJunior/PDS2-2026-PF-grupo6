@@ -1,7 +1,7 @@
 #include "Carrinho.hpp"
 
 #include <fstream>
-#include <sstream>
+#include <sstream> 
 #include <string>
 
 ProdutoNaoEncontradoException::ProdutoNaoEncontradoException()
@@ -54,7 +54,7 @@ void Carrinho::adicionarProduto(const Produto& produto, int quantidade) {
 
         _quantidades[indiceProduto] = quantidadeTotal;
     } else {
-        if (!validarEstoque(produto, quantidade)) {
+        if (!validarEstoque(produto, quantidade)) {   
             throw EstoqueInsuficienteException();
         }
 
@@ -88,7 +88,7 @@ void Carrinho::atualizarQuantidade(int idProduto, int novaQuantidade) {
     if (indiceProduto == -1) {
         throw ProdutoNaoEncontradoException();
     }
-
+ 
     if (novaQuantidade == 0) {
         removerProduto(idProduto);
         return;
