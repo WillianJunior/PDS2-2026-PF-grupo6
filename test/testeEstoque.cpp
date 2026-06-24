@@ -4,7 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-
+#include <vector>
 
 static void removerArquivo(const std::string& nome) {
     std::remove(nome.c_str());
@@ -27,8 +27,8 @@ TEST_CASE("Estoque - produtos padrao quando arquivo nao existe") {
 
     Estoque estoque(arquivo);
 
-    std::string disp = estoque.exibirQuantidadeDisponiveis();
-    CHECK(!disp.empty());
+    std::vector<Produto> inv = estoque.obterInventario();
+    CHECK(!inv.empty());
 
     CHECK(estoque.impedirVendasAcimaMaximo(1, 1) == true);
 
@@ -52,36 +52,30 @@ TEST_CASE("Estoque - carrega produtos do arquivo existente") {
     removerArquivo(arquivo);
 }
 
-
-TEST_CASE("Estoque - exibirQuantidadeDisponiveis retorna string nao vazia") {
+TEST_CASE("Estoque - obterInventario retorna vetor populado") {
 
     const std::string arquivo = "te_disp.txt";
     removerArquivo(arquivo);
 
     Estoque estoque(arquivo);
 
-    std::string resultado =
-        estoque.exibirQuantidadeDisponiveis();
+    std::vector<Produto> inventario = estoque.obterInventario();
 
-    CHECK(!resultado.empty());
-    CHECK(resultado.find("unidades") != std::string::npos);
+    CHECK(!inventario.empty());
 
     removerArquivo(arquivo);
 }
 
-
 TEST_CASE("Estoque - alerta produtos com estoque critico") {
 
     const std::string arquivo = "te_critico.txt";
-
     removerArquivo(arquivo);
 
     Estoque estoque(arquivo);
 
-    std::string alertas = estoque.alertarEstoqueCritico();
+    std::vector<Produto> alertas = estoque.obterProdutosEmAlerta();
 
-    CHECK(!alertas.empty());
-    CHECK(alertas.find("ALERTA") != std::string::npos);
+    CHECK(alertas.size() == 2);
 
     removerArquivo(arquivo);
 }
@@ -96,13 +90,12 @@ TEST_CASE("Estoque - sem alerta quando todos em estoque suficiente") {
 
     Estoque estoque(arquivo);
 
-    std::string alertas = estoque.alertarEstoqueCritico();
+    std::vector<Produto> alertas = estoque.obterProdutosEmAlerta();
 
     CHECK(alertas.empty());
 
     removerArquivo(arquivo);
 }
-
 
 TEST_CASE("Estoque - congelarQuantidades valido") {
 

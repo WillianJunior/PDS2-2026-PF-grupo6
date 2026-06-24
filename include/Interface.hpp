@@ -1,5 +1,5 @@
-#ifndef UI_HPP
-#define UI_HPP
+#ifndef INTERFACE_HPP
+#define INTERFACE_HPP
 
 #include "Catalogo.hpp"
 #include "Carrinho.hpp"
@@ -11,14 +11,13 @@
 #include <string>
 
 /**
- * @class UI
+ * @class Interface
  * @brief Centraliza toda a interação com o terminal.
  * Toda saída ao usuário (cout) e leitura de entrada (cin)
  * deve passar por esta classe, conforme separação de responsabilidades.
  */
-class UI {
+class Interface {
 public:
-
     void exibirMenuPrincipal();
 
     void exibirMenuCliente(Carrinho& carrinho,
@@ -31,19 +30,15 @@ public:
     void telaCadastroCliente(const std::string& nomeArquivo);
     void telaRecuperacaoSenha(const std::string& nomeArquivo);
 
-
     void telaCatalogo(Catalogo& catalogo);
     void telaBusca(Catalogo& catalogo);
     void telaOrdenarPreco(Catalogo& catalogo);
-
 
     void telaCarrinho(Carrinho& carrinho);
     void telaCheckout(Carrinho& carrinho,
                       Cliente& cliente);
 
-
     void telaEstoque(Estoque& estoque);
-
 
     void imprimirSeparador() const;
     void imprimirTitulo(const std::string& titulo) const;

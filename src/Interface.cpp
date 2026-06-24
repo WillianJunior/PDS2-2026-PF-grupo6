@@ -1,59 +1,43 @@
-#include "UI.hpp"
+#include "Interface.hpp"
 
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
 
-
-void UI::imprimirSeparador() const {
+void Interface::imprimirSeparador() const {
     std::cout << "========================================\n";
 }
 
-void UI::imprimirTitulo(
-        const std::string& titulo) const {
-
+void Interface::imprimirTitulo(const std::string& titulo) const {
     imprimirSeparador();
     std::cout << "   " << titulo << "\n";
     imprimirSeparador();
 }
 
-void UI::exibirErro(
-        const std::string& mensagem) const {
-
+void Interface::exibirErro(const std::string& mensagem) const {
     std::cout << "[ERRO] " << mensagem << "\n";
 }
 
-void UI::exibirSucesso(
-        const std::string& mensagem) const {
-
+void Interface::exibirSucesso(const std::string& mensagem) const {
     std::cout << "[OK] " << mensagem << "\n";
 }
 
-int UI::lerOpcao(
-        const std::string& prompt) const {
-
+int Interface::lerOpcao(const std::string& prompt) const {
     int opcao;
-
     std::cout << prompt;
 
     while (!(std::cin >> opcao)) {
         std::cin.clear();
-        std::cin.ignore(
-            std::numeric_limits<std::streamsize>::max(),
-            '\n');
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "Opcao invalida. Tente novamente: ";
     }
 
-    std::cin.ignore(
-        std::numeric_limits<std::streamsize>::max(),
-        '\n');
-
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return opcao;
 }
 
-std::string UI::lerTexto(
-        const std::string& prompt) const {
-
+std::string Interface::lerTexto(const std::string& prompt) const {
     std::string texto;
     std::cout << prompt;
     std::getline(std::cin, texto);
@@ -62,7 +46,7 @@ std::string UI::lerTexto(
 
 // ── Menu Principal ───────────────────────────────────
 
-void UI::exibirMenuPrincipal() {
+void Interface::exibirMenuPrincipal() {
     imprimirTitulo("BEM-VINDO A LIVRARIA ONLINE");
     std::cout << "1 - Login\n";
     std::cout << "2 - Cadastrar\n";
@@ -72,52 +56,41 @@ void UI::exibirMenuPrincipal() {
 
 // ── Autenticacao ─────────────────────────────────────
 
-void UI::telaCadastroCliente(
-        const std::string& nomeArquivo) {
-
+void Interface::telaCadastroCliente(const std::string& nomeArquivo) {
     imprimirTitulo("CADASTRO DE CLIENTE");
 
     std::string nome     = lerTexto("Nome: ");
     std::string email    = lerTexto("Email: ");
     std::string senha    = lerTexto("Senha: ");
     std::string cpf      = lerTexto("CPF: ");
-    std::string resposta = lerTexto(
-        "Qual foi a primeira escola que voce estudou? ");
+    std::string resposta = lerTexto("Qual foi a primeira escola que voce estudou? ");
 
     Cliente cliente(nome, email, senha, cpf, resposta);
 
     if (cliente.cadastrarCliente(nomeArquivo)) {
         exibirSucesso("Cadastro realizado com sucesso!");
     } else {
-        exibirErro(
-            "Dados invalidos ou email ja cadastrado.");
+        exibirErro("Dados invalidos ou email ja cadastrado.");
     }
 }
 
-void UI::telaRecuperacaoSenha(
-        const std::string& nomeArquivo) {
-
+void Interface::telaRecuperacaoSenha(const std::string& nomeArquivo) {
     imprimirTitulo("RECUPERAR SENHA");
 
     std::string email     = lerTexto("Email: ");
-    std::string resposta  = lerTexto(
-        "Qual foi a primeira escola que voce estudou? ");
+    std::string resposta  = lerTexto("Qual foi a primeira escola que voce estudou? ");
     std::string novaSenha = lerTexto("Nova senha: ");
 
-    if (Usuario::recuperarSenha(
-            email, resposta, novaSenha, nomeArquivo)) {
-
+    if (Usuario::recuperarSenha(email, resposta, novaSenha, nomeArquivo)) {
         exibirSucesso("Senha atualizada com sucesso!");
     } else {
-        exibirErro(
-            "Dados incorretos ou senha muito curta.");
+        exibirErro("Dados incorretos ou senha muito curta.");
     }
 }
 
 // ── Catalogo ─────────────────────────────────────────
 
-void UI::telaCatalogo(Catalogo& catalogo) {
-
+void Interface::telaCatalogo(Catalogo& catalogo) {
     int opcao;
 
     do {
@@ -131,54 +104,41 @@ void UI::telaCatalogo(Catalogo& catalogo) {
         opcao = lerOpcao("Opcao: ");
 
         if (opcao == 1) {
-
             telaBusca(catalogo);
-
         } else if (opcao == 2) {
-
             imprimirTitulo("CATEGORIAS");
-            std::cout << "1 - Ficcao\n";
-            std::cout << "2 - Tecnico\n";
-            std::cout << "3 - Infantil\n";
-            std::cout << "4 - Romance\n";
-            std::cout << "5 - Suspense\n";
-            std::cout << "6 - Fantasia\n";
+            std::cout << "1 - Ficcao\n2 - Tecnico\n3 - Infantil\n4 - Romance\n5 - Suspense\n6 - Fantasia\n";
 
             int cat = lerOpcao("Categoria: ");
+            CategoriaProduto categoria = CategoriaProduto::Ficcao;
+            bool categoriaValida = true;
 
-            CategoriaProduto categoria =
-                CategoriaProduto::Ficcao;
-
-            if (cat == 2) {
-                categoria = CategoriaProduto::Tecnico;
-            } else if (cat == 3) {
-                categoria = CategoriaProduto::Infantil;
-            } else if (cat == 4) {
-                categoria = CategoriaProduto::Romance;
-            } else if (cat == 5) {
-                categoria = CategoriaProduto::Suspense;
-            } else if (cat == 6) {
-                categoria = CategoriaProduto::Fantasia;
+            switch (cat) {
+                case 1: categoria = CategoriaProduto::Ficcao; break;
+                case 2: categoria = CategoriaProduto::Tecnico; break;
+                case 3: categoria = CategoriaProduto::Infantil; break;
+                case 4: categoria = CategoriaProduto::Romance; break;
+                case 5: categoria = CategoriaProduto::Suspense; break;
+                case 6: categoria = CategoriaProduto::Fantasia; break;
+                default: 
+                    exibirErro("Categoria invalida.");
+                    categoriaValida = false;
+                    break;
             }
 
-            std::string resultado =
-                catalogo.listarProdutosCategoria(categoria);
-
-            if (resultado.empty()) {
-                exibirErro("Nenhum produto encontrado.");
-            } else {
-                std::cout << resultado;
+            if (categoriaValida) {
+                std::string resultado = catalogo.listarProdutosCategoria(categoria);
+                if (resultado.empty()) {
+                    exibirErro("Nenhum produto encontrado.");
+                } else {
+                    std::cout << resultado;
+                }
             }
-
         } else if (opcao == 3) {
-
             telaOrdenarPreco(catalogo);
-
         } else if (opcao == 4) {
-
             int id = lerOpcao("ID do produto: ");
-            std::string desc =
-                catalogo.exibirDescricao(id);
+            std::string desc = catalogo.exibirDescricao(id);
 
             if (desc.empty()) {
                 exibirErro("Produto nao encontrado.");
@@ -190,8 +150,7 @@ void UI::telaCatalogo(Catalogo& catalogo) {
     } while (opcao != 0);
 }
 
-void UI::telaBusca(Catalogo& catalogo) {
-
+void Interface::telaBusca(Catalogo& catalogo) {
     std::string palavra = lerTexto("Palavra-chave: ");
     std::string resultado = catalogo.buscarItem(palavra);
 
@@ -202,16 +161,14 @@ void UI::telaBusca(Catalogo& catalogo) {
     }
 }
 
-void UI::telaOrdenarPreco(Catalogo& catalogo) {
-
+void Interface::telaOrdenarPreco(Catalogo& catalogo) {
     int opcao = lerOpcao("1 - Crescente  2 - Decrescente: ");
     std::cout << catalogo.ordenarPreco(opcao == 1);
 }
 
 // ── Carrinho ─────────────────────────────────────────
 
-void UI::telaCarrinho(Carrinho& carrinho) {
-
+void Interface::telaCarrinho(Carrinho& carrinho) {
     imprimirTitulo("SEU CARRINHO");
 
     const auto& produtos    = carrinho.getProdutos();
@@ -226,55 +183,39 @@ void UI::telaCarrinho(Carrinho& carrinho) {
         std::cout << produtos[i].getNome()
                   << " x" << quantidades[i]
                   << " - R$ "
-                  << produtos[i].getPreco() *
-                     quantidades[i]
+                  << produtos[i].getPreco() * quantidades[i]
                   << "\n";
     }
 
     imprimirSeparador();
-    std::cout << "Subtotal: R$ "
-              << carrinho.calcularSubtotal() << "\n";
-    std::cout << "Frete:    R$ "
-              << carrinho.getValorFrete()    << "\n";
-    std::cout << "Total:    R$ "
-              << carrinho.getValorTotal()    << "\n";
+    std::cout << "Subtotal: R$ " << carrinho.calcularSubtotal() << "\n";
+    std::cout << "Frete:    R$ " << carrinho.getValorFrete()    << "\n";
+    std::cout << "Total:    R$ " << carrinho.getValorTotal()    << "\n";
 }
 
-void UI::telaCheckout(Carrinho& carrinho,
-                      Cliente& cliente) {
-
+void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
     imprimirTitulo("FINALIZAR COMPRA");
 
     try {
-
         Pedido pedido(carrinho, cliente);
 
-        std::cout << pedido.gerarResumoFaturamento(
-            cliente, carrinho);
-
-        std::cout << pedido.informarValorFrete(
-            cliente.getEndereco()) << "\n";
-
-        std::cout << pedido.estimarDataEntrega(
-            cliente.getEndereco()) << "\n";
+        std::cout << pedido.gerarResumoFaturamento(cliente, carrinho);
+        std::cout << pedido.informarValorFrete(cliente.getEndereco()) << "\n";
+        std::cout << pedido.estimarDataEntrega(cliente.getEndereco()) << "\n";
 
         std::cout << "1 - Pix  2 - Credito  3 - Debito\n";
-
         int opcao = lerOpcao("Forma de pagamento: ");
 
-        Pedido::MetodoPagamento metodo =
-            Pedido::MetodoPagamento::Pix;
-
+        Pedido::MetodoPagamento metodo = Pedido::MetodoPagamento::Pix;
         if (opcao == 2) {
             metodo = Pedido::MetodoPagamento::Credito;
         } else if (opcao == 3) {
             metodo = Pedido::MetodoPagamento::Debito;
         }
 
-        std::cout << pedido.processarPagamentos(metodo)
-                  << "\n";
+        std::cout << pedido.processarPagamentos(metodo) << "\n";
 
-        pedido.salvarEmArquivo(cliente);
+        pedido.salvarEmArquivo(cliente, carrinho);
 
         exibirSucesso("Pedido salvo com sucesso!");
         carrinho.limparCarrinho();
@@ -286,34 +227,32 @@ void UI::telaCheckout(Carrinho& carrinho,
 
 // ── Estoque (admin) ──────────────────────────────────
 
-void UI::telaEstoque(Estoque& estoque) {
-
+void Interface::telaEstoque(Estoque& estoque) {
     imprimirTitulo("GERENCIAR ESTOQUE");
 
-    std::cout << estoque.exibirQuantidadeDisponiveis();
+    std::vector<Produto> inventario = estoque.obterInventario();
+    for (const auto& p : inventario) {
+        std::cout << p.getNome() << ": " << p.getQuantidadeEstoque() << " unidades\n";
+    }
 
     imprimirSeparador();
 
-    std::string alertas = estoque.alertarEstoqueCritico();
-
+    std::vector<Produto> alertas = estoque.obterProdutosEmAlerta();
     if (!alertas.empty()) {
-        std::cout << alertas;
+        for (const auto& p : alertas) {
+            std::cout << "ALERTA: " << p.getNome() << " com estoque critico!\n";
+        }
     }
 }
 
 // ── Menus de acesso ──────────────────────────────────
 
-void UI::exibirMenuCliente(Carrinho& carrinho,
-                            Catalogo& catalogo,
-                            Cliente& cliente) {
+void Interface::exibirMenuCliente(Carrinho& carrinho, Catalogo& catalogo, Cliente& cliente) {
     int opcao;
 
     do {
         imprimirTitulo("MENU CLIENTE");
-        std::cout << "1 - Catalogo\n";
-        std::cout << "2 - Meu carrinho\n";
-        std::cout << "3 - Finalizar compra\n";
-        std::cout << "0 - Sair\n";
+        std::cout << "1 - Catalogo\n2 - Meu carrinho\n3 - Finalizar compra\n0 - Sair\n";
 
         opcao = lerOpcao("Opcao: ");
 
@@ -324,19 +263,15 @@ void UI::exibirMenuCliente(Carrinho& carrinho,
         } else if (opcao == 3) {
             telaCheckout(carrinho, cliente);
         }
-
     } while (opcao != 0);
 }
 
-void UI::exibirMenuAdministrador(Catalogo& catalogo,
-                                  Estoque& estoque) {
+void Interface::exibirMenuAdministrador(Catalogo& catalogo, Estoque& estoque) {
     int opcao;
 
     do {
         imprimirTitulo("MENU ADMINISTRADOR");
-        std::cout << "1 - Catalogo\n";
-        std::cout << "2 - Estoque\n";
-        std::cout << "0 - Sair\n";
+        std::cout << "1 - Catalogo\n2 - Estoque\n0 - Sair\n";
 
         opcao = lerOpcao("Opcao: ");
 
@@ -345,6 +280,5 @@ void UI::exibirMenuAdministrador(Catalogo& catalogo,
         } else if (opcao == 2) {
             telaEstoque(estoque);
         }
-
     } while (opcao != 0);
 }

@@ -37,7 +37,7 @@ $(TEST_APP): $(ARQUIVOS_ORIGEM) $(ARQUIVOS_DE_TESTE)
 run: $(APP)
 	./$(APP)
 
-$(APP): $(ARQUIVOS_ORIGEM) src/UI.cpp main.cpp
+$(APP): $(ARQUIVOS_ORIGEM) src/Interface.cpp main.cpp
 	$(CXX) -std=c++17 -Wall -Iinclude -o $@ $^
 
 clean_gcda:

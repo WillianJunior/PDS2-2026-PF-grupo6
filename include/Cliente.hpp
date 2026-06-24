@@ -27,7 +27,6 @@ struct Cartao {
  * @brief Usuário com permissão de compra no sistema.
  *
  * Herda de Usuario e adiciona CPF, endereço e cartões.
- * O construtor delega validações ao construtor de Usuario.
  */
 class Cliente : public Usuario {
 private:
@@ -37,8 +36,8 @@ private:
 
 public:
     /**
-     * @brief Constrói um Cliente validando todos os dados via Usuario.
-     * @throw std::invalid_argument se algum dado for inválido.
+     * @brief Constrói um Cliente e garante que ele só exista em estado válido.
+     * @throw std::invalid_argument se qualquer dado (inclusive validade matemática do CPF) for inválido.
      */
     Cliente(const std::string& nome,
             const std::string& email,
@@ -66,21 +65,18 @@ public:
      * @return true se salvo; false se inválido no Luhn ou duplicado.
      * @throw std::invalid_argument se o número for vazio.
      */
-    bool salvarCartao(const std::string& novoCartao,
-                      TipoCartao tipo);
+    bool salvarCartao(const std::string& novoCartao, TipoCartao tipo);
 
     /**
      * @brief Atualiza o endereço de entrega.
-     * @throw std::invalid_argument se o endereço for vazio
-     *        ou contiver ponto e vírgula.
+     * @throw std::invalid_argument se o endereço for vazio ou contiver ponto e vírgula.
      */
     void adicionarEndereco(const std::string& novoEndereco);
 
     /**
-     * @brief Salva o cliente no arquivo se todos os dados forem válidos.
+     * @brief Salva o cliente no arquivo.
      * @param nomeArquivo Arquivo destino.
      * @return true se salvo; false se email já cadastrado.
-     * @throw std::invalid_argument se CPF ou resposta inválidos.
      * @throw std::runtime_error se ocorrer erro de arquivo.
      */
     bool cadastrarCliente(const std::string& nomeArquivo) const;

@@ -7,8 +7,8 @@
 TEST_CASE("Teste do Cliente - Inicializacao e Casos Base") {
 
     Cliente cliente(
-        "Carlos Silva",
-        "carlos@email.com",
+        "Djulia Kelikey",
+        "djulia@email.com",
         "Senha@123",
         "11144477735",
         "Belo Horizonte");
@@ -21,38 +21,35 @@ TEST_CASE("Teste do Cliente - Inicializacao e Casos Base") {
 TEST_CASE("Teste de Validacao de CPF - Casos Validos e Invalidos") {
 
     SUBCASE("CPF Valido com formatacao") {
-        Cliente cliente(
-            "Ana", "ana@email.com",
-            "abc123", "111.444.777-35", "Gato");
-        CHECK(cliente.validarCpf() == true);
+        CHECK_NOTHROW(Cliente("Thais", "thais@email.com", "abc123", "111.444.777-35", "Gato"));
     }
 
-    SUBCASE("CPF Invalido por tamanho curto") {
-        Cliente cliente(
-            "Ana", "ana@email.com",
-            "abc123", "123.456", "Gato");
-        CHECK(cliente.validarCpf() == false);
+    SUBCASE("CPF Invalido por tamanho curto (Estoura no construtor)") {
+        CHECK_THROWS_AS(
+            Cliente("Thais", "thais@email.com", "abc123", "123.456", "Gato"), 
+            std::invalid_argument
+        );
     }
 
-    SUBCASE("CPF Invalido com digitos iguais") {
-        Cliente cliente(
-            "Ana", "ana@email.com",
-            "abc123", "11111111111", "Gato");
-        CHECK(cliente.validarCpf() == false);
+    SUBCASE("CPF Invalido com digitos iguais (Estoura no construtor)") {
+        CHECK_THROWS_AS(
+            Cliente("Thais", "thais@email.com", "abc123", "11111111111", "Gato"), 
+            std::invalid_argument
+        );
     }
 
-    SUBCASE("CPF Invalido por erro nos digitos verificadores") {
-        Cliente cliente(
-            "Ana", "ana@email.com",
-            "abc123", "11144477700", "Gato");
-        CHECK(cliente.validarCpf() == false);
+    SUBCASE("CPF Invalido por erro nos digitos verificadores (Estoura no construtor)") {
+        CHECK_THROWS_AS(
+            Cliente("Thais", "thais@email.com", "abc123", "11144477700", "Gato"), 
+            std::invalid_argument
+        );
     }
 }
 
 TEST_CASE("Teste do Gerenciamento de Endereco Unico e Troca") {
 
     Cliente cliente(
-        "Carlos", "carlos@email.com",
+        "Djulia Kelikey", "djulia@email.com",
         "abc123", "11144477735", "BH");
 
     cliente.adicionarEndereco(
@@ -71,7 +68,7 @@ TEST_CASE("Teste do Gerenciamento de Endereco Unico e Troca") {
 TEST_CASE("Teste de Endereco Invalido") {
 
     Cliente cliente(
-        "Carlos", "carlos@email.com",
+        "Djulia Kelikey", "djulia@email.com",
         "abc123", "11144477735", "BH");
 
     CHECK_THROWS_AS(
@@ -86,7 +83,7 @@ TEST_CASE("Teste de Endereco Invalido") {
 TEST_CASE("Teste de Validacao e Salvamento de Cartao (Algoritmo de Luhn)") {
 
     Cliente cliente(
-        "Carlos", "carlos@email.com",
+        "Djulia Kelikey", "djulia@email.com",
         "abc123", "11144477735", "BH");
 
     SUBCASE("Tentativa de salvar cartao invalido") {
@@ -130,8 +127,8 @@ TEST_CASE("Teste do Fluxo de Cadastro Completo") {
     std::remove("usuarios_teste.txt");
 
     Cliente cliente(
-        "Carlos",
-        "carlos@email.com",
+        "Djulia Kelikey",
+        "djulia@email.com",
         "Senha123",
         "11144477735",
         "BH");
@@ -143,13 +140,9 @@ TEST_CASE("Teste do Fluxo de Cadastro Completo") {
     std::remove("usuarios_teste.txt");
 }
 
-TEST_CASE("Teste de Cadastro com CPF Invalido") {
-
-    Cliente cliente(
-        "Ana", "ana@email.com",
-        "Senha123", "11111111111", "escola");
+TEST_CASE("Teste de Cadastro com CPF Invalido (Agora bloqueado no construtor)") {
 
     CHECK_THROWS_AS(
-        cliente.cadastrarCliente("usuarios_teste.txt"),
+        Cliente("Thais", "thais@email.com", "Senha123", "11111111111", "escola"),
         std::invalid_argument);
 }
