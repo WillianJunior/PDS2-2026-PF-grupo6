@@ -34,7 +34,32 @@ public:
     void telaBusca(Catalogo& catalogo);
     void telaOrdenarPreco(Catalogo& catalogo);
 
-    void telaCarrinho(Carrinho& carrinho);
+    /**
+     * @brief Exibe o carrinho atualizado do cliente.
+     * 
+     * Mostra todos os produtos presentes no carrinho, suas quantidades,
+     * o subtotal da compra, o valor do frete e o valor total.
+     * Essa função é chamada dentro do menu do carrinho para que,
+     * após cada alteração, o cliente visualize o estado atual do carrinho.
+     * 
+     * @param carrinho Referência constante para o carrinho do cliente.
+     */
+    void exibirCarrinhoAtualizado(const Carrinho& carrinho);
+
+    /**
+     * @brief Exibe o menu de gerenciamento do carrinho.
+     * 
+     * Permite que o cliente adicione produtos ao carrinho, altere a quantidade
+     * de um produto já adicionado, remova um produto específico ou limpe todo
+     * o carrinho. O catálogo é recebido para que a interface consiga listar
+     * os produtos disponíveis e buscar o produto escolhido pelo ID.
+     * 
+     * @param carrinho Referência para o carrinho do cliente.
+     * @param catalogo Referência para o catálogo de produtos disponíveis.
+     */
+    void telaCarrinho(Carrinho& carrinho,
+                      Catalogo& catalogo);
+
     void telaCheckout(Carrinho& carrinho,
                       Cliente& cliente);
 
