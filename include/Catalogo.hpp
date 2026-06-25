@@ -6,15 +6,16 @@
 #include <string>
 
 class Catalogo {
-    
 private:
     std::vector<Produto> produtos_;
+    std::string _nomeArquivo;
 
 public:
     /**
      * @brief Construtor da classe Catalogo.
+     * @param nomeArquivo Define o arquivo de persistencia (permite mock para testes).
      */
-    Catalogo();
+    Catalogo(const std::string& nomeArquivo = "catalogo.txt");
 
     /**
      * @brief Lista produtos de acordo com a categoria selecionada.
@@ -61,6 +62,17 @@ public:
      * @throws std::runtime_error Se ocorrer um erro ao abrir o arquivo para alteração.
      */
     void removerProduto(int idProduto);
+
+    /**
+     * @brief Retorna todos os produtos formatados em string para listar no carrinho.
+     */
+    std::string listarProdutosDisponiveis() const;
+
+    /**
+     * @brief Busca e retorna um objeto Produto pelo seu ID.
+     * @throw std::invalid_argument se não encontrar o produto.
+     */
+    Produto buscarProdutoPorId(int idProduto) const;
 
     /**
      * @brief Estrutura fictícia representando um pedido realizado.

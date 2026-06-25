@@ -5,31 +5,32 @@
 #include <stdexcept>
 #include <string>
 
-TEST_CASE("Catalogo - Inicializacao e Excecoes Defensivas (Caminhos Tristes)") {
-    std::remove("catalogo.txt"); 
-    Catalogo catalogo;
+// Usamos um arquivo FAKE de teste para nao destruir o banco de dados real
+const std::string ARQUIVO_TESTE = "catalogo_teste.txt";
 
-    SUBCASE("Buscar item sem arquivo físico") {
+TEST_CASE("Catalogo - Inicializacao e Excecoes Defensivas (Caminhos Tristes)") {
+    std::remove(ARQUIVO_TESTE.c_str()); 
+    Catalogo catalogo(ARQUIVO_TESTE);
+    
+    // Forçamos a exclusão do arquivo com a classe rodando para simular um erro no disco
+    std::remove(ARQUIVO_TESTE.c_str()); 
+
+    SUBCASE("Disparos de erro sem arquivo fisico") {
         CHECK_THROWS_AS(catalogo.buscarItem("Teste"), std::runtime_error);
-    }
-    SUBCASE("Listar categorias sem arquivo físico") {
         CHECK_THROWS_AS(catalogo.listarProdutosCategoria(CategoriaProduto::Ficcao), std::runtime_error);
-    }
-    SUBCASE("Ordenar precos sem arquivo físico") {
         CHECK_THROWS_AS(catalogo.ordenarPreco(true), std::runtime_error);
-    }
-    SUBCASE("Exibir descricao sem arquivo físico") {
         CHECK_THROWS_AS(catalogo.exibirDescricao(1), std::runtime_error);
-    }
-    SUBCASE("Remover produto sem arquivo físico") {
         CHECK_THROWS_AS(catalogo.removerProduto(1), std::runtime_error);
+        CHECK_THROWS_AS(catalogo.buscarProdutoPorId(1), std::runtime_error);
+        
+        CHECK(catalogo.listarProdutosDisponiveis() == "");
     }
 }
 
-TEST_CASE("Catalogo - Operacoes de Adicao, Leitura e Remocao (Caminho Feliz)") {
+TEST_CASE("Catalogo - Operacoes de Adicao, Leitura e Integracao com Carrinho") {
 
-    std::remove("catalogo.txt"); 
-    Catalogo catalogo;
+    std::remove(ARQUIVO_TESTE.c_str()); 
+    Catalogo catalogo(ARQUIVO_TESTE);
 
     Produto p1(1, "O Senhor dos Aneis", "Fantasia Epica", 120.50f, 10, CategoriaProduto::Fantasia);
     Produto p2(2, "Clean Code", "Engenharia de Software", 89.90f, 5, CategoriaProduto::Tecnico);
@@ -47,19 +48,16 @@ TEST_CASE("Catalogo - Operacoes de Adicao, Leitura e Remocao (Caminho Feliz)") {
         CHECK(resInexistente.empty());
     }
 
-    SUBCASE("Listar por Categoria (Padrão de salvamento)") {
-    
+    SUBCASE("Listar por Categoria") {
         std::string resFiccao = catalogo.listarProdutosCategoria(CategoriaProduto::Ficcao);
-        CHECK(resFiccao.find("O Senhor dos Aneis") != std::string::npos);
-        CHECK(resFiccao.find("Clean Code") != std::string::npos);
+        CHECK(resFiccao.find("1984") != std::string::npos);
 
         std::string resTecnico = catalogo.listarProdutosCategoria(CategoriaProduto::Tecnico);
-        CHECK(resTecnico.empty()); 
+        CHECK(resTecnico.find("Clean Code") != std::string::npos); 
     }
 
     SUBCASE("Ordenar Preco via Bubble Sort") {
         std::string resCrescente = catalogo.ordenarPreco(true);
-
         CHECK(resCrescente.find("1984") < resCrescente.find("Clean Code"));
         CHECK(resCrescente.find("Clean Code") < resCrescente.find("O Senhor dos Aneis"));
 
@@ -75,17 +73,35 @@ TEST_CASE("Catalogo - Operacoes de Adicao, Leitura e Remocao (Caminho Feliz)") {
         CHECK(descVazia.empty());
     }
 
+    SUBCASE("Listar Produtos Disponiveis para a Interface do Carrinho") {
+        std::string resDisp = catalogo.listarProdutosDisponiveis();
+        CHECK(resDisp.find("ID: 1") != std::string::npos);
+        CHECK(resDisp.find("Clean Code") != std::string::npos);
+         
+        CHECK(resDisp.find("R$ 45") != std::string::npos); 
+    }
+
+    SUBCASE("Buscar Produto instanciado pelo ID") {
+        Produto busca = catalogo.buscarProdutoPorId(2);
+        CHECK(busca.getNome() == "Clean Code");
+        CHECK(busca.getQuantidadeEstoque() == 5);
+        CHECK(busca.getCategoria() == CategoriaProduto::Tecnico);
+        
+        Produto buscaFantasia = catalogo.buscarProdutoPorId(1);
+        CHECK(buscaFantasia.getCategoria() == CategoriaProduto::Fantasia);
+
+        CHECK_THROWS_AS(catalogo.buscarProdutoPorId(999), std::invalid_argument);
+    }
+
     SUBCASE("Remover Produto do Catalogo") {
         CHECK_NOTHROW(catalogo.removerProduto(2));
         
         std::string buscaAposRemocao = catalogo.buscarItem("Clean Code");
         CHECK(buscaAposRemocao.empty());
         
-     
         std::string buscaRestante = catalogo.buscarItem("1984");
         CHECK(buscaRestante.find("1984") != std::string::npos);
     }
 
- 
-    std::remove("catalogo.txt"); 
+    std::remove(ARQUIVO_TESTE.c_str()); 
 }

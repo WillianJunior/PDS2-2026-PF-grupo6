@@ -3,23 +3,38 @@
 #include <sstream>
 #include <stdexcept>
 
-Catalogo::Catalogo() {}
+Catalogo::Catalogo(const std::string& nomeArquivo) : _nomeArquivo(nomeArquivo) {
+    // Boas praticas (RAII): Garante que o arquivo exista para não quebrar as buscas.
+    std::ofstream arquivo(_nomeArquivo, std::ios::app);
+}
 
 void Catalogo::adicionarProduto(const Produto& produto) {
-    std::ofstream arquivo("catalogo.txt", std::ios::app);
+    std::ofstream arquivo(_nomeArquivo, std::ios::app);
     if (!arquivo.is_open()) {
         throw std::runtime_error("Erro defensivo: Nao foi possivel abrir o arquivo do catalogo para adicionar produto.");
+    }
+
+    std::string categoriaTexto;
+    switch (produto.getCategoria()) {
+        case CategoriaProduto::Ficcao:   categoriaTexto = "Ficcao";   break;
+        case CategoriaProduto::Tecnico:  categoriaTexto = "Tecnico";  break;
+        case CategoriaProduto::Infantil: categoriaTexto = "Infantil"; break;
+        case CategoriaProduto::Romance:  categoriaTexto = "Romance";  break;
+        case CategoriaProduto::Suspense: categoriaTexto = "Suspense"; break;
+        case CategoriaProduto::Fantasia: categoriaTexto = "Fantasia"; break;
+        default:                         categoriaTexto = "Outros";   break;
     }
 
     arquivo << produto.getId() << ";"
             << produto.getNome() << ";"
             << produto.getDescricao() << ";"
             << produto.getPreco() << ";"
-            << "Ficcao\n"; // Categoria padrao utilizada pelo fluxo original do grupo
+            << produto.getQuantidadeEstoque() << ";"
+            << categoriaTexto << "\n";
 }
 
 void Catalogo::removerProduto(int idProduto) {
-    std::ifstream entrada("catalogo.txt");
+    std::ifstream entrada(_nomeArquivo);
     if (!entrada.is_open()) {
         throw std::runtime_error("Erro defensivo: Catalogo nao encontrado para a remocao do item.");
     }
@@ -39,7 +54,7 @@ void Catalogo::removerProduto(int idProduto) {
     }
     entrada.close();
 
-    std::ofstream saida("catalogo.txt");
+    std::ofstream saida(_nomeArquivo);
     if (!saida.is_open()) {
         throw std::runtime_error("Erro defensivo: Falha ao reescrever o arquivo apos remocao.");
     }
@@ -50,7 +65,7 @@ void Catalogo::removerProduto(int idProduto) {
 }
 
 std::string Catalogo::buscarItem(const std::string& palavraChave) const {
-    std::ifstream arquivo("catalogo.txt");
+    std::ifstream arquivo(_nomeArquivo);
     if (!arquivo.is_open()) {
         throw std::runtime_error("Erro defensivo: Arquivo de catalogo ausente durante a busca.");
     }
@@ -77,7 +92,7 @@ std::string Catalogo::listarProdutosCategoria(CategoriaProduto categoria) const 
         case CategoriaProduto::Fantasia: categoriaTexto = "Fantasia"; break;
     }
 
-    std::ifstream arquivo("catalogo.txt");
+    std::ifstream arquivo(_nomeArquivo);
     if (!arquivo.is_open()) {
         throw std::runtime_error("Erro defensivo: Arquivo de catalogo ausente durante a listagem.");
     }
@@ -99,11 +114,12 @@ std::string Catalogo::ordenarPreco(bool crescente) {
         std::string nome;
         std::string descricao;
         float preco;
+        int quantidade;
         std::string categoria;
     };
 
     std::vector<Livro> livros;
-    std::ifstream arquivo("catalogo.txt");
+    std::ifstream arquivo(_nomeArquivo);
     if (!arquivo.is_open()) {
         throw std::runtime_error("Erro defensivo: Arquivo de catalogo ausente durante a ordenacao.");
     }
@@ -113,22 +129,22 @@ std::string Catalogo::ordenarPreco(bool crescente) {
         if (linha.empty()) continue;
         Livro livro;
         std::stringstream ss(linha);
-        std::string precoTexto;
-        std::string idTexto;
+        std::string precoTexto, idTexto, qtdTexto;
 
         std::getline(ss, idTexto, ';');
         std::getline(ss, livro.nome, ';');
         std::getline(ss, livro.descricao, ';');
         std::getline(ss, precoTexto, ';');
+        std::getline(ss, qtdTexto, ';');
         std::getline(ss, livro.categoria);
 
         livro.id = std::stoi(idTexto);
         livro.preco = std::stof(precoTexto);
+        livro.quantidade = std::stoi(qtdTexto);
         livros.push_back(livro);
     }
     arquivo.close();
 
-    // Algoritmo Bubble Sort original mantido intacto
     for (size_t i = 0; i < livros.size(); i++) {
         for (size_t j = 0; j < livros.size() - 1; j++) {
             bool troca = crescente ? (livros[j].preco > livros[j + 1].preco)
@@ -143,15 +159,15 @@ std::string Catalogo::ordenarPreco(bool crescente) {
 
     std::string resultado;
     for (const auto& livro : livros) {
-        resultado += std::to_string(livro.id) + " " + livro.nome + " " + std::to_string(livro.preco) + "\n";
+        resultado += std::to_string(livro.id) + " | " + livro.nome + " | R$ " + std::to_string(livro.preco) + "\n";
     }
     return resultado;
 }
 
 std::string Catalogo::exibirDescricao(int idProduto) const {
-    std::ifstream arquivo("catalogo.txt");
+    std::ifstream arquivo(_nomeArquivo);
     if (!arquivo.is_open()) {
-        throw std::runtime_error("Erro defensivo: Arquivo de catalogo ausente na visualizacao de descricao.");
+        throw std::runtime_error("Erro defensivo: Arquivo ausente na visualizacao de descricao.");
     }
 
     std::string linha;
@@ -170,4 +186,59 @@ std::string Catalogo::exibirDescricao(int idProduto) const {
         }
     }
     return ""; 
+}
+
+std::string Catalogo::listarProdutosDisponiveis() const {
+    std::ifstream arquivo(_nomeArquivo);
+    if (!arquivo.is_open()) return "";
+
+    std::string linha;
+    std::string resultado;
+
+    while (std::getline(arquivo, linha)) {
+        if (linha.empty()) continue;
+        std::stringstream ss(linha);
+        std::string idTexto, nome, desc, precoTexto;
+        
+        std::getline(ss, idTexto, ';');
+        std::getline(ss, nome, ';');
+        std::getline(ss, desc, ';');
+        std::getline(ss, precoTexto, ';');
+        
+        resultado += "ID: " + idTexto + " | " + nome + " | R$ " + precoTexto + "\n";
+    }
+    return resultado;
+}
+
+Produto Catalogo::buscarProdutoPorId(int idProduto) const {
+    std::ifstream arquivo(_nomeArquivo);
+    if (!arquivo.is_open()) {
+        throw std::runtime_error("Erro: Catalogo indisponivel.");
+    }
+
+    std::string linha;
+    while (std::getline(arquivo, linha)) {
+        if (linha.empty()) continue;
+        std::stringstream ss(linha);
+        std::string idTexto, nome, desc, precoTexto, qtdTexto, categoriaTexto;
+
+        std::getline(ss, idTexto, ';');
+        std::getline(ss, nome, ';');
+        std::getline(ss, desc, ';');
+        std::getline(ss, precoTexto, ';');
+        std::getline(ss, qtdTexto, ';');
+        std::getline(ss, categoriaTexto);
+
+        if (std::stoi(idTexto) == idProduto) {
+            CategoriaProduto cat = CategoriaProduto::Ficcao;
+            if (categoriaTexto == "Tecnico") cat = CategoriaProduto::Tecnico;
+            else if (categoriaTexto == "Infantil") cat = CategoriaProduto::Infantil;
+            else if (categoriaTexto == "Romance") cat = CategoriaProduto::Romance;
+            else if (categoriaTexto == "Suspense") cat = CategoriaProduto::Suspense;
+            else if (categoriaTexto == "Fantasia") cat = CategoriaProduto::Fantasia;
+
+            return Produto(std::stoi(idTexto), nome, desc, std::stof(precoTexto), std::stoi(qtdTexto), cat);
+        }
+    }
+    throw std::invalid_argument("Produto não encontrado no catalogo.");
 }
