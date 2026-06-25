@@ -1,1 +1,2 @@
-administrador;Administrador;admin@livraria.com;admin123;00000000000;primeiraescola;
+administrador;Administrador;admin@livraria.com;admin123;00000000000;primeiraescola;cliente;vivi;vivi@gmail.com;senha123;11144477735;batman;
+cliente;vivi;vivi@gmail.com;senha123;11144477735;batman;
