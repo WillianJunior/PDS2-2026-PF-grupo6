@@ -1,4 +1,4 @@
-1;1984;Classico distopico de George Orwell sobre a vigilância do Grande Irmao;39.90;15;Ficcao
+1;1984;Classico distopico de George Orwell sobre a vigilancia do Grande Irmao;39.90;15;Ficcao
 2;Codigo Limpo;Habilidades Praticas do Agile Software por Robert C. Martin;89.90;10;Tecnico
 3;O Pequeno Principe;A celebre historia do jovem que vivia num pequeno asteroide;24.90;20;Infantil
 4;Dom Casmurro;Obra-prima de Machado de Assis sobre a duvida de Bentinho;19.90;12;Romance
@@ -6,3 +6,25 @@
 6;O Hobbit;A grande aventura de Bilbo Bolseiro na Terra Media por Tolkien;54.90;14;Fantasia
 7;C++ Como Programar;Guia completo de programacao orientada a objetos com C++;120.00;5;Tecnico
 8;Admiravel Mundo Novo;Distopia futurista de Aldous Huxley sobre uma sociedade controlada;34.90;11;Ficcao
+9;Harry Potter e a Pedra Filosofal;Primeiro livro da saga do jovem bruxo Harry Potter;59.90;18;Fantasia
+10;Percy Jackson e o Ladrao de Raios;Aventura mitologica envolvendo deuses gregos e um jovem semideus;44.90;15;Fantasia
+11;Sherlock Holmes Um Estudo em Vermelho;Primeira investigacao do famoso detetive Sherlock Holmes;36.90;10;Suspense
+12;Assassinato no Expresso do Oriente;Misterio investigado pelo detetive Hercule Poirot;42.90;9;Suspense
+13;Orgulho e Preconceito;Romance classico entre Elizabeth Bennet e Mr Darcy;29.90;16;Romance
+14;Como Eu Era Antes de Voce;Historia emocionante sobre amor e superacao;39.90;13;Romance
+15;A Menina que Roubava Livros;Narrativa marcante ambientada durante a Segunda Guerra Mundial;45.90;12;Ficcao
+16;A Revolucao dos Bichos;Fabula politica escrita por George Orwell;27.90;20;Ficcao
+17;Estruturas de Dados em C++;Introducao a listas pilhas filas arvores e grafos utilizando C++;99.90;8;Tecnico
+18;Padroes de Projeto;Catalogo dos principais Design Patterns utilizados em desenvolvimento de software;139.90;6;Tecnico
+19;O Menino Maluquinho;Historia divertida do garoto mais famoso de Ziraldo;22.90;18;Infantil
+20;Diario de um Banana;As aventuras engracadas de Greg Heffley na escola;31.90;17;Infantil
+21;Coraline;Uma garota encontra um mundo paralelo cheio de misterios;37.90;10;Fantasia
+22;Dracula;O vampiro mais famoso da literatura classica;43.90;8;Suspense
+23;Frankenstein;O cientista Victor Frankenstein cria uma criatura assustadora;41.90;9;Ficcao
+24;O Alquimista;A jornada de Santiago em busca de sua lenda pessoal;32.90;14;Romance
+25;A Cabana;Historia de fe perdao e transformacao;38.90;11;Romance
+26;Java Como Programar;Livro completo sobre desenvolvimento utilizando Java;118.90;7;Tecnico
+27;Python para Ciencia de Dados;Conceitos fundamentais de analise de dados com Python;109.90;9;Tecnico
+28;As Cronicas de Narnia;Aventura fantastica no reino de Narnia;52.90;13;Fantasia
+29;O Codigo Da Vinci;Thriller envolvendo misterios historicos e simbolos religiosos;47.90;10;Suspense
+30;Extraordinario;Historia inspiradora sobre empatia amizade e superacao;35.90;15;Infantil

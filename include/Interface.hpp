@@ -29,6 +29,7 @@ public:
     void telaRecuperacaoSenha(const std::string& nomeArquivo);
 
     void telaPerfil(Cliente& cliente);
+    void telaGerenciarCartoes(Cliente& cliente);
 
     void telaCatalogo(Catalogo& catalogo);
     void telaBusca(Catalogo& catalogo);

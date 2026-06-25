@@ -25,8 +25,6 @@ struct Cartao {
 /**
  * @class Cliente
  * @brief Usuário com permissão de compra no sistema.
- *
- * Herda de Usuario e adiciona CPF, endereço e cartões.
  */
 class Cliente : public Usuario {
 private:
@@ -34,10 +32,10 @@ private:
     std::string         _endereco;
     std::vector<Cartao> _cartoesSalvos;
 
+    // Metodo interno para puxar do cartoes.txt
+    void carregarCartoes(const std::string& arquivo = "cartoes.txt");
+
 public:
-    /**
-     * @brief Constrói um Cliente e garante que ele só exista em estado válido.
-     */
     Cliente(const std::string& nome,
             const std::string& email,
             const std::string& senha,
@@ -47,34 +45,14 @@ public:
     ~Cliente() override = default;
     void exibirPerfil() const override;
 
-    /**
-     * @brief Valida os dígitos verificadores do CPF.
-     */
     bool validarCpf() const;
-
-    /**
-     * @brief Valida o número do cartão pelo algoritmo de Luhn.
-     */
     bool validarCartao(const std::string& numeroCartao) const;
 
-    /**
-     * @brief Tenta salvar um cartão na lista do cliente.
-     */
-    bool salvarCartao(const std::string& novoCartao, TipoCartao tipo);
+    bool salvarCartao(const std::string& novoCartao, TipoCartao tipo, const std::string& arquivo = "cartoes.txt");
+    bool removerCartao(const std::string& numeroCartao, const std::string& arquivo = "cartoes.txt");
 
-    /**
-     * @brief Atualiza o endereço de entrega na RAM.
-     */
     void adicionarEndereco(const std::string& novoEndereco);
-    
-    /**
-     * @brief Atualiza o endereço de entrega direto no arquivo TXT.
-     */
     void alterarEndereco(std::string novoEndereco, const std::string& nomeArquivo = "usuarios.txt");
-
-    /**
-     * @brief Salva o cliente no arquivo.
-     */
     bool cadastrarCliente(const std::string& nomeArquivo) const;
 
     const std::string&         getCpf()           const;
