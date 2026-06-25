@@ -17,13 +17,13 @@ public:
                   const std::string& senha,
                   const std::string& respostaSeguranca);
 
-    // ~Administrador() override = default;
+     ~Administrador() override = default;
 
     /**
      * @brief Implementação do polimorfismo exigido.
      * Sobrescreve o método da classe base para exibir o perfil administrativo.
      */
-    // void exibirPerfil() const override;
+     void exibirPerfil() const override;
 
     /**
      * @brief Gera o relatório textual com os dados cadastrais do cliente.

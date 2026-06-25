@@ -3,6 +3,8 @@
 
 #include <cstdio>
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 TEST_CASE("Teste do Cliente - Inicializacao e Casos Base") {
 
@@ -147,12 +149,41 @@ TEST_CASE("Teste de Cadastro com CPF Invalido (Agora bloqueado no construtor)") 
         std::invalid_argument);
 }
 
-/*
-// TODO para amanhã: Descomentar após implementar o polimorfismo em Usuario
-TEST_CASE("Teste de Polimorfismo Dinamico - Cliente") {
-    Cliente cli("Thais", "thais@email.com", "Senha@123", "11144477735", "ECA");
+TEST_CASE("Cliente - Alterar Endereco direto no arquivo TXT") {
+    std::string arquivoTeste = "usuarios_teste_endereco.txt";
+    std::remove(arquivoTeste.c_str());
+
+    Cliente cliente("Djulia", "djulia@ufmg.br", "senha123", "11144477735", "escola");
     
-    // Apenas garante que a execução da impressão ocorra sem quebrar a memória
-    CHECK_NOTHROW(cli.exibirPerfil());
+    // Cadastra o cliente para gerar o arquivo fisico
+    CHECK(cliente.cadastrarCliente(arquivoTeste) == true);
+
+    SUBCASE("Alteracao de endereco bem-sucedida") {
+        CHECK_NOTHROW(cliente.alterarEndereco("Rua da Engenharia, 404", arquivoTeste));
+        CHECK(cliente.getEndereco() == "Rua da Engenharia, 404");
+    }
+
+    SUBCASE("Disparo de excecao para endereco invalido") {
+        CHECK_THROWS_AS(cliente.alterarEndereco("Rua;Hacker", arquivoTeste), std::invalid_argument);
+    }
+
+    std::remove(arquivoTeste.c_str());
 }
-*/
+
+TEST_CASE("Cliente - Polimorfismo (exibirPerfil)") {
+    Cliente cliente("Kayke", "kayke@ufmg.br", "senha123", "93541134780", "escola");
+    cliente.adicionarEndereco("Campus Pampulha");
+
+    std::ostringstream bufferSaida;
+    std::streambuf* coutAntigo = std::cout.rdbuf(bufferSaida.rdbuf());
+
+    cliente.exibirPerfil();
+
+    std::cout.rdbuf(coutAntigo);
+
+    std::string impressao = bufferSaida.str();
+
+    CHECK(impressao.find("Kayke") != std::string::npos);
+    CHECK(impressao.find("93541134780") != std::string::npos);
+    CHECK(impressao.find("Campus Pampulha") != std::string::npos);
+}

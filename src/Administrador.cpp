@@ -16,12 +16,10 @@ Administrador::Administrador(
     : Usuario(nome, email, senha, "administrador", respostaSeguranca) {
 }
 
-/* // TODO para amanhã: Descomentar este bloco para ativar o Polimorfismo Dinâmico
 void Administrador::exibirPerfil() const {
     std::cout << "[STATUS: ADMINISTRADOR DO SISTEMA]\n";
     Usuario::exibirPerfil();
 }
-*/
 
 std::string Administrador::gerenciarContas(const Cliente& cliente) const {
     std::stringstream ss;

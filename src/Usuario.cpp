@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 Usuario::Usuario(std::string nome,
                  std::string email,
@@ -43,6 +44,10 @@ Usuario::Usuario(std::string nome,
     if (_respostaSeguranca.find(';') != std::string::npos) {
         throw std::invalid_argument("Resposta de seguranca nao pode conter ponto e virgula.");
     }
+}
+
+void Usuario::exibirPerfil() const {
+    std::cout << "Nome: " << _nome << " | Email: " << _email << "\n";
 }
 
 bool Usuario::validarEmail(std::string novoEmail) const {
@@ -148,6 +153,7 @@ void Usuario::alterarNome(std::string novoNome,
         std::string senhaArquivo;
         std::string cpfArquivo;
         std::string respostaArquivo;
+        std::string enderecoArquivo; // ADICIONADO PARA A 7A COLUNA
 
         if (!std::getline(ss, tipo, ';') ||
             !std::getline(ss, nomeArquivoUsuario, ';') ||
@@ -158,6 +164,8 @@ void Usuario::alterarNome(std::string novoNome,
 
             throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
         }
+        
+        std::getline(ss, enderecoArquivo); // Puxa o endereco
 
         if (emailArquivo == _email) {
             nomeArquivoUsuario = novoNome;
@@ -170,7 +178,8 @@ void Usuario::alterarNome(std::string novoNome,
             emailArquivo + ";" +
             senhaArquivo + ";" +
             cpfArquivo + ";" +
-            respostaArquivo
+            respostaArquivo + ";" + // ADICIONADO ;
+            enderecoArquivo         // ADICIONADO ENDERECO
         );
     }
 
@@ -232,6 +241,7 @@ void Usuario::alterarEmail(std::string novoEmail,
         std::string senhaArquivo;
         std::string cpfArquivo;
         std::string respostaArquivo;
+        std::string enderecoArquivo; // ADICIONADO PARA A 7A COLUNA
 
         if (!std::getline(ss, tipo, ';') ||
             !std::getline(ss, nomeArquivoUsuario, ';') ||
@@ -242,6 +252,8 @@ void Usuario::alterarEmail(std::string novoEmail,
 
             throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
         }
+        
+        std::getline(ss, enderecoArquivo); // Puxa o endereco
 
         if (emailArquivo == _email) {
             emailArquivo = novoEmail;
@@ -254,7 +266,8 @@ void Usuario::alterarEmail(std::string novoEmail,
             emailArquivo + ";" +
             senhaArquivo + ";" +
             cpfArquivo + ";" +
-            respostaArquivo
+            respostaArquivo + ";" + 
+            enderecoArquivo         
         );
     }
 
@@ -308,6 +321,7 @@ void Usuario::alterarSenha(std::string novaSenha,
         std::string senhaArquivo;
         std::string cpfArquivo;
         std::string respostaArquivo;
+        std::string enderecoArquivo; 
 
         if (!std::getline(ss, tipo, ';') ||
             !std::getline(ss, nomeArquivoUsuario, ';') ||
@@ -318,6 +332,8 @@ void Usuario::alterarSenha(std::string novaSenha,
 
             throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
         }
+        
+        std::getline(ss, enderecoArquivo);
 
         if (emailArquivo == _email) {
             senhaArquivo = novaSenha;
@@ -330,7 +346,8 @@ void Usuario::alterarSenha(std::string novaSenha,
             emailArquivo + ";" +
             senhaArquivo + ";" +
             cpfArquivo + ";" +
-            respostaArquivo
+            respostaArquivo + ";" + 
+            enderecoArquivo         
         );
     }
 
@@ -487,6 +504,7 @@ bool Usuario::salvarUsuario(
         const std::string& senha,
         const std::string& cpf,
         const std::string& respostaSeguranca,
+        const std::string& endereco, 
         const std::string& nomeArquivo) {
 
     Usuario usuario(nome, email, senha, tipo, respostaSeguranca);
@@ -514,7 +532,8 @@ bool Usuario::salvarUsuario(
             << email << ";"
             << senha << ";"
             << cpf << ";"
-            << respostaSeguranca
+            << respostaSeguranca << ";" 
+            << endereco                 
             << "\n";
 
     if (!arquivo.good()) {
@@ -567,6 +586,7 @@ bool Usuario::recuperarSenha(
         std::string senhaArquivo;
         std::string cpf;
         std::string respostaArquivo;
+        std::string enderecoArquivo; 
 
         if (!std::getline(ss, tipo, ';') ||
             !std::getline(ss, nome, ';') ||
@@ -577,6 +597,8 @@ bool Usuario::recuperarSenha(
 
             throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
         }
+        
+        std::getline(ss, enderecoArquivo); 
 
         if (emailArquivo == email) {
             encontrouEmail = true;
@@ -593,7 +615,8 @@ bool Usuario::recuperarSenha(
             emailArquivo + ";" +
             senhaArquivo + ";" +
             cpf + ";" +
-            respostaArquivo
+            respostaArquivo + ";" + 
+            enderecoArquivo         
         );
     }
 

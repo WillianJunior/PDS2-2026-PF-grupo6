@@ -54,16 +54,16 @@ void Interface::exibirMenuPrincipal() {
     std::cout << "0 - Sair\n";
 }
 
-// ── Autenticacao ─────────────────────────────────────
+// ── Autenticacao e Perfil ────────────────────────────
 
 void Interface::telaCadastroCliente(const std::string& nomeArquivo) {
     imprimirTitulo("CADASTRO DE CLIENTE");
 
-    std::string nome     = lerTexto("Nome: ");
+    std::string nome     = lerTexto("Nome (sem ponto e virgula): ");
     std::string email    = lerTexto("Email: ");
-    std::string senha    = lerTexto("Senha: ");
-    std::string cpf      = lerTexto("CPF: ");
-    std::string resposta = lerTexto("Qual foi a primeira escola que voce estudou? ");
+    std::string senha    = lerTexto("Senha (minimo 6 caracteres, sem ';'): ");
+    std::string cpf      = lerTexto("CPF (apenas numeros, 11 digitos): ");
+    std::string resposta = lerTexto("Qual foi a primeira escola que voce estudou? (sem ';'): ");
 
     try {
         Cliente cliente(nome, email, senha, cpf, resposta);
@@ -82,14 +82,53 @@ void Interface::telaRecuperacaoSenha(const std::string& nomeArquivo) {
     imprimirTitulo("RECUPERAR SENHA");
 
     std::string email     = lerTexto("Email: ");
-    std::string resposta  = lerTexto("Qual foi a primeira escola que voce estudou? ");
-    std::string novaSenha = lerTexto("Nova senha: ");
+    std::string resposta  = lerTexto("Qual foi a primeira escola que voce estudou?: ");
+    std::string novaSenha = lerTexto("Nova senha (minimo 6 caracteres, sem ';'): ");
 
-    if (Usuario::recuperarSenha(email, resposta, novaSenha, nomeArquivo)) {
-        exibirSucesso("Senha atualizada com sucesso!");
-    } else {
-        exibirErro("Dados incorretos ou senha muito curta.");
+    try {
+        if (Usuario::recuperarSenha(email, resposta, novaSenha, nomeArquivo)) {
+            exibirSucesso("Senha atualizada com sucesso!");
+        } else {
+            exibirErro("Dados incorretos.");
+        }
+    } catch (const std::exception& e) {
+        exibirErro(e.what());
     }
+}
+
+void Interface::telaPerfil(Cliente& cliente) {
+    int opcao;
+
+    do {
+        imprimirTitulo("MEU PERFIL");
+        std::cout << "1 - Atualizar Nome\n";
+        std::cout << "2 - Atualizar Email\n";
+        std::cout << "3 - Atualizar Endereco\n";
+        std::cout << "0 - Voltar\n";
+
+        opcao = lerOpcao("Opcao: ");
+
+        try {
+            if (opcao == 1) {
+                std::string novoNome = lerTexto("Novo Nome (sem ';'): ");
+                cliente.alterarNome(novoNome, "usuarios.txt"); 
+                exibirSucesso("Nome atualizado com sucesso no arquivo!");
+            } else if (opcao == 2) {
+                std::string novoEmail = lerTexto("Novo Email: ");
+                cliente.alterarEmail(novoEmail, "usuarios.txt"); 
+                exibirSucesso("Email atualizado com sucesso no arquivo!");
+            } else if (opcao == 3) {
+                std::string novoEndereco = lerTexto("Novo Endereco (sem ';'): ");
+                cliente.alterarEndereco(novoEndereco, "usuarios.txt"); 
+                exibirSucesso("Endereco atualizado com sucesso no arquivo!");
+            } else if (opcao != 0) {
+                exibirErro("Opcao invalida.");
+            }
+        } catch (const std::exception& e) {
+            exibirErro(e.what());
+        }
+
+    } while (opcao != 0);
 }
 
 // ── Catalogo ─────────────────────────────────────────
@@ -200,7 +239,7 @@ void Interface::exibirCarrinhoAtualizado(const Carrinho& carrinho) {
     const auto& quantidades = carrinho.getQuantidades();
 
     if (produtos.empty()) {
-        std::cout << "Carrinho vazio.\n";
+        std::cout << "Seu carrinho esta vazio no momento. Que tal voltar ao menu e acessar nosso Catalogo para explorar novas leituras?\n";
         return;
     }
 
@@ -251,7 +290,8 @@ void Interface::telaCarrinho(Carrinho& carrinho, Catalogo& catalogo) {
 
                 Produto produto = catalogo.buscarProdutoPorId(id);
                 carrinho.adicionarProduto(produto, quantidade);
-                exibirSucesso("Produto adicionado ao carrinho.");
+                
+                exibirSucesso(std::to_string(quantidade) + "x '" + produto.getNome() + "' adicionado(s) ao carrinho com sucesso!");
             }
 
             else if (opcao == 2) {
@@ -292,8 +332,8 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 
     try {
         if (cliente.getEndereco().empty()) {
-            std::string endereco = lerTexto("Informe o endereco de entrega: ");
-            cliente.adicionarEndereco(endereco);
+            std::string endereco = lerTexto("Informe o endereco de entrega (sem ';'): ");
+            cliente.alterarEndereco(endereco); 
         }
         
         Pedido pedido(carrinho, cliente);
@@ -317,7 +357,7 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 
         pedido.salvarEmArquivo(cliente, carrinho);
 
-        exibirSucesso("Pedido saved com sucesso!");
+        exibirSucesso("Pedido salvo com sucesso!");
         carrinho.limparCarrinho();
 
     } catch (const std::exception& e) {
@@ -349,23 +389,19 @@ void Interface::telaEstoque(Estoque& estoque) {
 
 // ── Menus de acesso ──────────────────────────────────
 
-/* // TODO para amanhã: Descomentar este bloco para ativar o Cabeçalho Polimórfico útil
-void Interface::exibirCabecalhoMenu(const Usuario& usuarioLogado) const {
-    imprimirTitulo("SISTEMA DE E-COMMERCE");
-    usuarioLogado.exibirPerfil(); //
-    imprimirSeparador();
-}
-*/
-
 void Interface::exibirMenuCliente(Carrinho& carrinho, Catalogo& catalogo, Cliente& cliente) {
     int opcao;
 
     do {
-        // Amanhã eu substituo a linha de baixo por: exibirCabecalhoMenu(cliente);
+        imprimirTitulo("SISTEMA DE E-COMMERCE");
+        cliente.exibirPerfil(); // Magica do Polimorfismo sendo impressa aqui!
+        imprimirSeparador();
+        
         imprimirTitulo("MENU CLIENTE");
         std::cout << "1 - Catalogo\n";
         std::cout << "2 - Meu carrinho\n";
         std::cout << "3 - Finalizar compra\n";
+        std::cout << "4 - Meu Perfil\n";
         std::cout << "0 - Sair\n";
 
         opcao = lerOpcao("Opcao: ");
@@ -376,6 +412,8 @@ void Interface::exibirMenuCliente(Carrinho& carrinho, Catalogo& catalogo, Client
             telaCarrinho(carrinho, catalogo);
         } else if (opcao == 3) {
             telaCheckout(carrinho, cliente);
+        } else if (opcao == 4) {
+            telaPerfil(cliente); 
         } else if (opcao != 0) {
             exibirErro("Opcao invalida.");
         }

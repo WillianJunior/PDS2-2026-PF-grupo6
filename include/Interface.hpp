@@ -18,9 +18,6 @@ class Interface {
 public:
     void exibirMenuPrincipal();
 
-    // TODO para amanhã: Descomentar para usar o cabeçalho polimórfico útil
-    // void exibirCabecalhoMenu(const Usuario& usuarioLogado) const;
-
     void exibirMenuCliente(Carrinho& carrinho,
                            Catalogo& catalogo,
                            Cliente& cliente);
@@ -30,6 +27,8 @@ public:
 
     void telaCadastroCliente(const std::string& nomeArquivo);
     void telaRecuperacaoSenha(const std::string& nomeArquivo);
+
+    void telaPerfil(Cliente& cliente);
 
     void telaCatalogo(Catalogo& catalogo);
     void telaBusca(Catalogo& catalogo);

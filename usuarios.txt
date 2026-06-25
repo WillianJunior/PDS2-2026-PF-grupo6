@@ -1,1 +1,1 @@
-administrador;Administrador;admin@livraria.com;admin123;00000000000;primeiraescola
+administrador;Administrador;admin@livraria.com;admin123;00000000000;primeiraescola;

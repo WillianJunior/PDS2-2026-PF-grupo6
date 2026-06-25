@@ -60,11 +60,7 @@ TEST_CASE("Administrador - Validação, Integracao e Polimorfismo (Coverage C8)"
         std::remove("usuarios_teste.txt");
     }
 
-    /*
-    // TODO para amanhã: Descomentar este teste após implementar o polimorfismo em Usuario
     SUBCASE("Teste de Polimorfismo Dinamico") {
-        // Apenas para fins de cobertura, garantindo que o override roda sem erros
         CHECK_NOTHROW(admin.exibirPerfil());
     }
-    */
 }

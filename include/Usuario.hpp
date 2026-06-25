@@ -21,6 +21,9 @@ protected:
 
 public:
 
+    virtual ~Usuario() = default;
+    virtual void exibirPerfil() const;
+
     /**
      * @brief Construtor da classe Usuario.
      *
@@ -195,6 +198,7 @@ public:
      * @param senha Senha do usuário.
      * @param cpf CPF do usuário.
      * @param respostaSeguranca Resposta da pergunta de segurança.
+     * @param endereco Endereço do cliente (adicionado para a 7a coluna)
      * @param nomeArquivo Arquivo de usuários.
      *
      * @return true se o usuário for salvo.
@@ -210,6 +214,7 @@ public:
         const std::string& senha,
         const std::string& cpf,
         const std::string& respostaSeguranca,
+        const std::string& endereco = "", // ADICIONADO AQUI
         const std::string& nomeArquivo = "usuarios.txt");
 
     /**

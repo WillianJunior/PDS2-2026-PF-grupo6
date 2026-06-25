@@ -91,7 +91,7 @@ TEST_CASE("Usuario - armazenarNome") {
 TEST_CASE("Usuario - alterarNome persiste no arquivo") {
     const std::string arquivo = "tuj_alterar_nome.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     Usuario u("fulana", "fulana@email.com", "senha123",
               "cliente", "escola");
@@ -107,7 +107,7 @@ TEST_CASE("Usuario - alterarNome persiste no arquivo") {
 TEST_CASE("Usuario - alterarEmail persiste no arquivo") {
     const std::string arquivo = "tuj_alterar_email.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     Usuario u("fulana", "fulana@email.com", "senha123",
               "cliente", "escola");
@@ -124,8 +124,8 @@ TEST_CASE("Usuario - alterarEmail persiste no arquivo") {
 TEST_CASE("Usuario - alterarEmail duplicado") {
     const std::string arquivo = "tuj_alterar_email_dup.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n"
-        "cliente;outra;outra@email.com;senha456;98765432100;colegio\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n"
+        "cliente;outra;outra@email.com;senha456;98765432100;colegio;\n");
 
     Usuario u("fulana", "fulana@email.com", "senha123",
               "cliente", "escola");
@@ -139,7 +139,7 @@ TEST_CASE("Usuario - alterarEmail duplicado") {
 TEST_CASE("Usuario - alterarSenha persiste no arquivo") {
     const std::string arquivo = "tuj_alterar_senha.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     Usuario u("fulana", "fulana@email.com", "senha123",
               "cliente", "escola");
@@ -198,7 +198,7 @@ TEST_CASE("Usuario - getPerguntaSeguranca") {
 TEST_CASE("Usuario - emailJaCadastrado encontrado") {
     const std::string arquivo = "tuj_email.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::emailJaCadastrado("fulana@email.com", arquivo) == true);
 
@@ -208,7 +208,7 @@ TEST_CASE("Usuario - emailJaCadastrado encontrado") {
 TEST_CASE("Usuario - emailJaCadastrado nao encontrado") {
     const std::string arquivo = "tuj_email2.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::emailJaCadastrado("outro@email.com", arquivo) == false);
 
@@ -233,8 +233,8 @@ TEST_CASE("Usuario - emailJaCadastrado arquivo invalido") {
 TEST_CASE("Usuario - fazerLogin correto") {
     const std::string arquivo = "tuj_login.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n"
-        "administrador;julia;julia@email.com;admin123;00000000000;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n"
+        "administrador;julia;julia@email.com;admin123;00000000000;escola;\n");
 
     CHECK(Usuario::fazerLogin(
         "fulana@email.com", "senha123", arquivo) == "cliente");
@@ -248,7 +248,7 @@ TEST_CASE("Usuario - fazerLogin correto") {
 TEST_CASE("Usuario - fazerLogin incorreto") {
     const std::string arquivo = "tuj_login2.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::fazerLogin(
         "fulana@email.com", "errada", arquivo) == "invalido");
@@ -271,7 +271,7 @@ TEST_CASE("Usuario - salvarUsuario sucesso") {
 
     CHECK(Usuario::salvarUsuario(
         "cliente", "fulana", "fulana@email.com",
-        "senha123", "12345678909", "escola", arquivo) == true);
+        "senha123", "12345678909", "escola", "", arquivo) == true);
 
     CHECK(Usuario::fazerLogin(
         "fulana@email.com", "senha123", arquivo) == "cliente");
@@ -285,11 +285,11 @@ TEST_CASE("Usuario - salvarUsuario email duplicado") {
 
     Usuario::salvarUsuario(
         "cliente", "fulana", "fulana@email.com",
-        "senha123", "12345678909", "escola", arquivo);
+        "senha123", "12345678909", "escola", "", arquivo);
 
     CHECK(Usuario::salvarUsuario(
         "cliente", "Outra", "fulana@email.com",
-        "outrasenha", "98765432100", "outra", arquivo) == false);
+        "outrasenha", "98765432100", "outra", "", arquivo) == false);
 
     removerArquivo(arquivo);
 }
@@ -300,11 +300,11 @@ TEST_CASE("Usuario - salvarUsuario dois usuarios distintos") {
 
     CHECK(Usuario::salvarUsuario(
         "cliente", "fulana", "fulana@email.com",
-        "senha123", "12345678909", "escola", arquivo) == true);
+        "senha123", "12345678909", "escola", "", arquivo) == true);
 
     CHECK(Usuario::salvarUsuario(
         "administrador", "julia", "julia@email.com",
-        "admin123", "00000000000", "escola", arquivo) == true);
+        "admin123", "00000000000", "escola", "", arquivo) == true);
 
     removerArquivo(arquivo);
 }
@@ -315,22 +315,22 @@ TEST_CASE("Usuario - salvarUsuario dados invalidos") {
 
     CHECK_THROWS_AS(Usuario::salvarUsuario(
         "cliente", "", "fulana@email.com",
-        "senha123", "12345678909", "escola", arquivo),
+        "senha123", "12345678909", "escola", "", arquivo),
         std::invalid_argument);
 
     CHECK_THROWS_AS(Usuario::salvarUsuario(
         "cliente", "fulana", "emailerrado",
-        "senha123", "12345678909", "escola", arquivo),
+        "senha123", "12345678909", "escola", "", arquivo),
         std::invalid_argument);
 
     CHECK_THROWS_AS(Usuario::salvarUsuario(
         "cliente", "fulana", "fulana@email.com",
-        "123", "12345678909", "escola", arquivo),
+        "123", "12345678909", "escola", "", arquivo),
         std::invalid_argument);
 
     CHECK_THROWS_AS(Usuario::salvarUsuario(
         "admin", "julia", "julia@email.com",
-        "admin123", "00000000000", "escola", arquivo),
+        "admin123", "00000000000", "escola", "", arquivo),
         std::invalid_argument);
 
     removerArquivo(arquivo);
@@ -339,7 +339,7 @@ TEST_CASE("Usuario - salvarUsuario dados invalidos") {
 TEST_CASE("Usuario - recuperarSenha senha curta") {
     const std::string arquivo = "tuj_rec.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK_THROWS_AS(Usuario::recuperarSenha(
         "fulana@email.com", "escola", "123", arquivo),
@@ -351,7 +351,7 @@ TEST_CASE("Usuario - recuperarSenha senha curta") {
 TEST_CASE("Usuario - recuperarSenha resposta errada") {
     const std::string arquivo = "tuj_rec2.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::recuperarSenha(
         "fulana@email.com", "errada", "novaSenha1", arquivo) == false);
@@ -362,7 +362,7 @@ TEST_CASE("Usuario - recuperarSenha resposta errada") {
 TEST_CASE("Usuario - recuperarSenha email nao encontrado") {
     const std::string arquivo = "tuj_rec3.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::recuperarSenha(
         "outro@email.com", "escola", "novaSenha1", arquivo) == false);
@@ -373,7 +373,7 @@ TEST_CASE("Usuario - recuperarSenha email nao encontrado") {
 TEST_CASE("Usuario - recuperarSenha sucesso") {
     const std::string arquivo = "tuj_rec4.txt";
     criarArquivo(arquivo,
-        "cliente;fulana;fulana@email.com;senha123;12345678909;escola\n");
+        "cliente;fulana;fulana@email.com;senha123;12345678909;escola;\n");
 
     CHECK(Usuario::recuperarSenha(
         "fulana@email.com", "escola", "novaSenha1", arquivo) == true);

@@ -44,14 +44,8 @@ public:
             const std::string& cpf,
             const std::string& respostaSeguranca);
 
-    // TODO para amanhã: Descomentar quando a Djulia atualizar a classe Usuario
-    // ~Cliente() override = default;
-
-    /**
-     * @brief Implementação do polimorfismo exigido pelo professor.
-     */
-    // TODO para amanhã: Descomentar para ativar o polimorfismo
-    // void exibirPerfil() const override;
+    ~Cliente() override = default;
+    void exibirPerfil() const override;
 
     /**
      * @brief Valida os dígitos verificadores do CPF.
@@ -69,9 +63,14 @@ public:
     bool salvarCartao(const std::string& novoCartao, TipoCartao tipo);
 
     /**
-     * @brief Atualiza o endereço de entrega.
+     * @brief Atualiza o endereço de entrega na RAM.
      */
     void adicionarEndereco(const std::string& novoEndereco);
+    
+    /**
+     * @brief Atualiza o endereço de entrega direto no arquivo TXT.
+     */
+    void alterarEndereco(std::string novoEndereco, const std::string& nomeArquivo = "usuarios.txt");
 
     /**
      * @brief Salva o cliente no arquivo.

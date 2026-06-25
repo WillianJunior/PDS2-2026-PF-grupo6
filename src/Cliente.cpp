@@ -4,6 +4,8 @@
 #include <cctype>
 #include <iostream> 
 #include <stdexcept>
+#include <fstream>
+#include <sstream>
 
 // ── Construtor ───────────────────────────────────────
 
@@ -25,17 +27,15 @@ Cliente::Cliente(const std::string& nome,
     }
 
     if (!validarCpf()) {
-        throw std::invalid_argument("CPF matematicamente invalido.");
+        throw std::invalid_argument("CPF invalido! Verifique se voce digitou exatamente 11 numeros verdadeiros (sem pontos ou tracos).");
     }
 }
 
-/* // TODO para amanhã: Descomentar este bloco para ativar o Polimorfismo Dinâmico
 void Cliente::exibirPerfil() const {
-    Usuario::exibirPerfil(); // Chama a impressão da classe mãe (Nome e Email)
+    Usuario::exibirPerfil(); 
     std::cout << "CPF: " << _cpf << " | Endereco: " 
               << (_endereco.empty() ? "Nao cadastrado" : _endereco) << "\n";
 }
-*/
 
 bool Cliente::validarCpf() const {
     std::string cpfLimpo;
@@ -170,6 +170,58 @@ void Cliente::adicionarEndereco(const std::string& novoEndereco) {
     _endereco = novoEndereco;
 }
 
+void Cliente::alterarEndereco(std::string novoEndereco, const std::string& nomeArquivo) {
+    if (novoEndereco.empty() || novoEndereco.find(';') != std::string::npos) {
+        throw std::invalid_argument("Endereco invalido ou contem ponto e virgula.");
+    }
+
+    std::ifstream entrada(nomeArquivo);
+    if (!entrada.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para leitura.");
+    }
+
+    std::vector<std::string> linhas;
+    std::string linha;
+    bool encontrou = false;
+
+    while (std::getline(entrada, linha)) {
+        if (linha.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(linha);
+        std::string tipo, nomeArq, emailArq, senhaArq, cpfArq, respArq, endArq;
+
+        if (!std::getline(ss, tipo, ';') || !std::getline(ss, nomeArq, ';') ||
+            !std::getline(ss, emailArq, ';') || !std::getline(ss, senhaArq, ';') ||
+            !std::getline(ss, cpfArq, ';') || !std::getline(ss, respArq, ';')) {
+            throw std::runtime_error("Dados invalidos no arquivo usuarios.txt.");
+        }
+        std::getline(ss, endArq);
+
+        if (emailArq == getEmail()) {
+            endArq = novoEndereco;
+            encontrou = true;
+        }
+
+        linhas.push_back(tipo + ";" + nomeArq + ";" + emailArq + ";" + senhaArq + ";" + cpfArq + ";" + respArq + ";" + endArq);
+    }
+    entrada.close();
+
+    if (!encontrou) {
+        throw std::runtime_error("Usuario nao encontrado no arquivo.");
+    }
+
+    std::ofstream saida(nomeArquivo);
+    if (!saida.is_open()) {
+        throw std::runtime_error("Erro ao abrir usuarios.txt para escrita.");
+    }
+    for (const std::string& l : linhas) {
+        saida << l << "\n";
+    }
+    _endereco = novoEndereco;
+}
+
 bool Cliente::cadastrarCliente(const std::string& nomeArquivo) const {
     if (!validarCpf()) {
         throw std::invalid_argument("CPF invalido para cadastro.");
@@ -182,6 +234,7 @@ bool Cliente::cadastrarCliente(const std::string& nomeArquivo) const {
         _senha,
         _cpf,
         _respostaSeguranca,
+        _endereco,
         nomeArquivo
     );
 }
