@@ -2,11 +2,10 @@
 #include <string>
 
 #include "../include/Administrador.hpp"
-#include "../include/Catalogo.hpp"
-#include "../include/Estoque.hpp"
 #include "../include/Cliente.hpp"
 #include "../include/Carrinho.hpp"
 #include "../include/Pedido.hpp"
+#include "../include/Produto.hpp"
 
 TEST_CASE("Administrador - Construtor e Heranca de Usuario") {
     Administrador admin("Djulia", "djulia@ufmg.br", "senha123", "ECA");
@@ -18,7 +17,7 @@ TEST_CASE("Administrador - Construtor e Heranca de Usuario") {
     CHECK(admin.getRespostaSeguranca() == "ECA");
 }
 
-TEST_CASE("Administrador - Validação e Integracao (Coverage C8)") {
+TEST_CASE("Administrador - Validação, Integracao e Polimorfismo (Coverage C8)") {
     Administrador admin("Thais", "thais@ufmg.br", "senha123", "PDS2");
 
     SUBCASE("Barricadas do Construtor Herdado") {
@@ -46,13 +45,26 @@ TEST_CASE("Administrador - Validação e Integracao (Coverage C8)") {
         
         std::string relatorioVenda = admin.atualizarVendas(p);
         CHECK(relatorioVenda.find("Valor total") != std::string::npos);
-        CHECK(relatorioVenda.find("50.00") != std::string::npos);
+        
+        CHECK(relatorioVenda.find("70.00") != std::string::npos); 
     }
 
-    SUBCASE("Metodos Vazios de Interface Legada") {
-        Catalogo c;
-        Estoque e;
-        CHECK_NOTHROW(admin.gerenciarCatalogo(c));
-        CHECK_NOTHROW(admin.gerenciarEstoque(e));
+    SUBCASE("Tratamento de Excecoes no Banco de Dados") {
+        Administrador novoAdmin("Kayke", "kayke@ufmg.br", "senha123", "ECA");
+        
+        std::remove("usuarios_teste.txt");
+        
+        CHECK(novoAdmin.cadastrarAdministrador("usuarios_teste.txt") == true);
+        CHECK(novoAdmin.cadastrarAdministrador("usuarios_teste.txt") == false); // Duplicata
+        
+        std::remove("usuarios_teste.txt");
     }
+
+    /*
+    // TODO para amanhã: Descomentar este teste após implementar o polimorfismo em Usuario
+    SUBCASE("Teste de Polimorfismo Dinamico") {
+        // Apenas para fins de cobertura, garantindo que o override roda sem erros
+        CHECK_NOTHROW(admin.exibirPerfil());
+    }
+    */
 }

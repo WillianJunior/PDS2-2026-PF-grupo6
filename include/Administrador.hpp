@@ -4,8 +4,6 @@
 #include "Usuario.hpp"
 #include <string>
 
-class Catalogo;
-class Estoque;
 class Cliente;
 class Pedido;
 
@@ -14,37 +12,35 @@ class Pedido;
  */
 class Administrador : public Usuario {
 public:
-    Administrador(std::string nome,
-                  std::string email,
-                  std::string senha,
-                  std::string respostaSeguranca);
+    Administrador(const std::string& nome,
+                  const std::string& email,
+                  const std::string& senha,
+                  const std::string& respostaSeguranca);
+
+    // ~Administrador() override = default;
 
     /**
-     * @brief Métodos legados mantidos vazios para compatibilidade de herança.
-     * O controle de fluxos interativos de telas agora reside unicamente na classe UI.
+     * @brief Implementação do polimorfismo exigido.
+     * Sobrescreve o método da classe base para exibir o perfil administrativo.
      */
-    void gerenciarCatalogo(Catalogo& catalogo);
-    void gerenciarEstoque(Estoque& estoque);
+    // void exibirPerfil() const override;
 
     /**
-     * @brief Gera o relatório textual com os dados cadastrais do cliente informado.
-     * @return String formatada contendo as informações.
+     * @brief Gera o relatório textual com os dados cadastrais do cliente.
      */
-    std::string gerenciarContas(Cliente& cliente);
+    std::string gerenciarContas(const Cliente& cliente) const;
 
     /**
-     * @brief Gera o relatório detalhado das informações financeiras e logísticas da venda.
-     * @return String formatada contendo o faturamento.
+     * @brief Gera o relatório detalhado das informações financeiras da venda.
      */
-    std::string atualizarVendas(Pedido& pedido);
+    std::string atualizarVendas(const Pedido& pedido) const;
 
     /**
      * @brief Cadastra o administrador no sistema.
-     * @return true se salvo com sucesso, false caso contrário.
-     * @throws std::runtime_error Se houver falha de escrita física de arquivos.
+     * @throws std::invalid_argument Se os dados internos estiverem corrompidos.
+     * @throws std::runtime_error Se houver falha de escrita física no banco de dados.
      */
-    bool cadastrarAdministrador(
-        const std::string& nomeArquivo = "usuarios.txt") const;
+    bool cadastrarAdministrador(const std::string& nomeArquivo = "usuarios.txt") const;
 };
 
 #endif

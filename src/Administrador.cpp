@@ -1,27 +1,29 @@
 #include "Administrador.hpp"
-#include "Catalogo.hpp" 
-#include "Estoque.hpp"  
 #include "Cliente.hpp" 
 #include "Pedido.hpp"
 
 #include <fstream>
 #include <sstream>
+#include <iomanip>
+#include <iostream>
 #include <stdexcept>
-#include <vector>
 
 Administrador::Administrador(
-        std::string nome,
-        std::string email,
-        std::string senha,
-        std::string respostaSeguranca)
+        const std::string& nome,
+        const std::string& email,
+        const std::string& senha,
+        const std::string& respostaSeguranca)
     : Usuario(nome, email, senha, "administrador", respostaSeguranca) {
 }
 
-// Métodos obsoletos de menu limpos para evitar inputs/outputs na camada de negócio.
-void Administrador::gerenciarCatalogo(Catalogo&) {}
-void Administrador::gerenciarEstoque(Estoque&) {}
+/* // TODO para amanhã: Descomentar este bloco para ativar o Polimorfismo Dinâmico
+void Administrador::exibirPerfil() const {
+    std::cout << "[STATUS: ADMINISTRADOR DO SISTEMA]\n";
+    Usuario::exibirPerfil();
+}
+*/
 
-std::string Administrador::gerenciarContas(Cliente& cliente) {
+std::string Administrador::gerenciarContas(const Cliente& cliente) const {
     std::stringstream ss;
     ss << "\n=== DADOS DO CLIENTE ===\n"
        << "Nome: " << cliente.getNome() << "\n"
@@ -32,8 +34,10 @@ std::string Administrador::gerenciarContas(Cliente& cliente) {
     return ss.str();
 }
 
-std::string Administrador::atualizarVendas(Pedido& pedido) {
+std::string Administrador::atualizarVendas(const Pedido& pedido) const {
     std::stringstream ss;
+
+    ss << std::fixed << std::setprecision(2);
     ss << "\n=== INFORMACOES DA VENDA ===\n"
        << "Valor total: R$ " << pedido.getValorTotal() << "\n"
        << "Frete: R$ " << pedido.getValorFrete() << "\n"
@@ -43,7 +47,7 @@ std::string Administrador::atualizarVendas(Pedido& pedido) {
 
 bool Administrador::cadastrarAdministrador(const std::string& nomeArquivo) const {
     if (!validarEmail(_email) || !gerenciarSenha(_senha) || _respostaSeguranca.empty()) {
-        return false;
+        throw std::invalid_argument("Operacao bloqueada: Dados invalidos para administrador.");
     }
 
     if (Usuario::emailJaCadastrado(_email, nomeArquivo)) {
@@ -52,14 +56,14 @@ bool Administrador::cadastrarAdministrador(const std::string& nomeArquivo) const
 
     std::ofstream arquivo(nomeArquivo, std::ios::app);
     if (!arquivo.is_open()) {
-        throw std::runtime_error("Erro defensivo: Falha ao registrar nova conta administrativa no arquivo de texto.");
+        throw std::runtime_error("Erro de I/O: Falha ao registrar administrador no arquivo.");
     }
 
     arquivo << "administrador" << ";"
             << _nome << ";"
             << _email << ";"
             << _senha << ";"
-            << "" << ";" // Conta administrativa não possui campo de CPF
+            << "" << ";" 
             << _respostaSeguranca << "\n";
 
     return true;
