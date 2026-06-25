@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iostream> 
 #include <stdexcept>
 
 // ── Construtor ───────────────────────────────────────
@@ -27,6 +28,14 @@ Cliente::Cliente(const std::string& nome,
         throw std::invalid_argument("CPF matematicamente invalido.");
     }
 }
+
+/* // TODO para amanhã: Descomentar este bloco para ativar o Polimorfismo Dinâmico
+void Cliente::exibirPerfil() const {
+    Usuario::exibirPerfil(); // Chama a impressão da classe mãe (Nome e Email)
+    std::cout << "CPF: " << _cpf << " | Endereco: " 
+              << (_endereco.empty() ? "Nao cadastrado" : _endereco) << "\n";
+}
+*/
 
 bool Cliente::validarCpf() const {
     std::string cpfLimpo;
@@ -162,7 +171,6 @@ void Cliente::adicionarEndereco(const std::string& novoEndereco) {
 }
 
 bool Cliente::cadastrarCliente(const std::string& nomeArquivo) const {
-
     if (!validarCpf()) {
         throw std::invalid_argument("CPF invalido para cadastro.");
     }

@@ -48,7 +48,7 @@ static bool carregarDadosUsuario(
 
 int main() {
     Interface interface_app;
-    Catalogo catalogo;
+    Catalogo catalogo; 
     Estoque  estoque;
 
     int opcao;
@@ -98,6 +98,6 @@ int main() {
 
     } while (opcao != 0);
 
-    std::cout << "Ate logo! :)\n";
+    std::cout << "Ate logo! Volte sempre :)\n";
     return 0;
 }

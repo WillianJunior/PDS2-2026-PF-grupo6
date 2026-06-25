@@ -146,3 +146,13 @@ TEST_CASE("Teste de Cadastro com CPF Invalido (Agora bloqueado no construtor)") 
         Cliente("Thais", "thais@email.com", "Senha123", "11111111111", "escola"),
         std::invalid_argument);
 }
+
+/*
+// TODO para amanhã: Descomentar após implementar o polimorfismo em Usuario
+TEST_CASE("Teste de Polimorfismo Dinamico - Cliente") {
+    Cliente cli("Thais", "thais@email.com", "Senha@123", "11144477735", "ECA");
+    
+    // Apenas garante que a execução da impressão ocorra sem quebrar a memória
+    CHECK_NOTHROW(cli.exibirPerfil());
+}
+*/

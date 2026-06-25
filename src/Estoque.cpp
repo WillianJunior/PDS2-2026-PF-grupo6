@@ -72,6 +72,9 @@ void Estoque::carregarEstoque() {
             throw std::runtime_error(
                 "Dados corrompidos no arquivo de estoque.");
         }
+        if (!catStr.empty() && catStr.back() == '\r') {
+            catStr.pop_back();
+        }
 
         try {
             int id        = std::stoi(idStr);

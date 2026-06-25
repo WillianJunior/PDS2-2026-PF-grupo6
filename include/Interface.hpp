@@ -13,12 +13,13 @@
 /**
  * @class Interface
  * @brief Centraliza toda a interação com o terminal.
- * Toda saída ao usuário (cout) e leitura de entrada (cin)
- * deve passar por esta classe, conforme separação de responsabilidades.
  */
 class Interface {
 public:
     void exibirMenuPrincipal();
+
+    // TODO para amanhã: Descomentar para usar o cabeçalho polimórfico útil
+    // void exibirCabecalhoMenu(const Usuario& usuarioLogado) const;
 
     void exibirMenuCliente(Carrinho& carrinho,
                            Catalogo& catalogo,
@@ -34,29 +35,8 @@ public:
     void telaBusca(Catalogo& catalogo);
     void telaOrdenarPreco(Catalogo& catalogo);
 
-    /**
-     * @brief Exibe o carrinho atualizado do cliente.
-     * 
-     * Mostra todos os produtos presentes no carrinho, suas quantidades,
-     * o subtotal da compra, o valor do frete e o valor total.
-     * Essa função é chamada dentro do menu do carrinho para que,
-     * após cada alteração, o cliente visualize o estado atual do carrinho.
-     * 
-     * @param carrinho Referência constante para o carrinho do cliente.
-     */
     void exibirCarrinhoAtualizado(const Carrinho& carrinho);
-
-    /**
-     * @brief Exibe o menu de gerenciamento do carrinho.
-     * 
-     * Permite que o cliente adicione produtos ao carrinho, altere a quantidade
-     * de um produto já adicionado, remova um produto específico ou limpe todo
-     * o carrinho. O catálogo é recebido para que a interface consiga listar
-     * os produtos disponíveis e buscar o produto escolhido pelo ID.
-     * 
-     * @param carrinho Referência para o carrinho do cliente.
-     * @param catalogo Referência para o catálogo de produtos disponíveis.
-     */
+    
     void telaCarrinho(Carrinho& carrinho,
                       Catalogo& catalogo);
 

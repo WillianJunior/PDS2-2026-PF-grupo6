@@ -65,12 +65,16 @@ void Interface::telaCadastroCliente(const std::string& nomeArquivo) {
     std::string cpf      = lerTexto("CPF: ");
     std::string resposta = lerTexto("Qual foi a primeira escola que voce estudou? ");
 
-    Cliente cliente(nome, email, senha, cpf, resposta);
+    try {
+        Cliente cliente(nome, email, senha, cpf, resposta);
 
-    if (cliente.cadastrarCliente(nomeArquivo)) {
-        exibirSucesso("Cadastro realizado com sucesso!");
-    } else {
-        exibirErro("Dados invalidos ou email ja cadastrado.");
+        if (cliente.cadastrarCliente(nomeArquivo)) {
+            exibirSucesso("Cadastro realizado com sucesso!");
+        } else {
+            exibirErro("Dados invalidos ou email ja cadastrado.");
+        }
+    } catch (const std::exception& e) {
+        exibirErro(e.what());
     }
 }
 
@@ -246,9 +250,7 @@ void Interface::telaCarrinho(Carrinho& carrinho, Catalogo& catalogo) {
                 int quantidade = lerOpcao("Quantidade: ");
 
                 Produto produto = catalogo.buscarProdutoPorId(id);
-
                 carrinho.adicionarProduto(produto, quantidade);
-
                 exibirSucesso("Produto adicionado ao carrinho.");
             }
 
@@ -290,16 +292,10 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 
     try {
         if (cliente.getEndereco().empty()) {
-
-    std::string endereco =
-        lerTexto(
-            "Informe o endereco de entrega: "
-        );
-
-    cliente.adicionarEndereco(
-        endereco
-    );
-}
+            std::string endereco = lerTexto("Informe o endereco de entrega: ");
+            cliente.adicionarEndereco(endereco);
+        }
+        
         Pedido pedido(carrinho, cliente);
 
         std::cout << pedido.gerarResumoFaturamento(cliente, carrinho);
@@ -321,7 +317,7 @@ void Interface::telaCheckout(Carrinho& carrinho, Cliente& cliente) {
 
         pedido.salvarEmArquivo(cliente, carrinho);
 
-        exibirSucesso("Pedido salvo com sucesso!");
+        exibirSucesso("Pedido saved com sucesso!");
         carrinho.limparCarrinho();
 
     } catch (const std::exception& e) {
@@ -353,10 +349,19 @@ void Interface::telaEstoque(Estoque& estoque) {
 
 // ── Menus de acesso ──────────────────────────────────
 
+/* // TODO para amanhã: Descomentar este bloco para ativar o Cabeçalho Polimórfico útil
+void Interface::exibirCabecalhoMenu(const Usuario& usuarioLogado) const {
+    imprimirTitulo("SISTEMA DE E-COMMERCE");
+    usuarioLogado.exibirPerfil(); //
+    imprimirSeparador();
+}
+*/
+
 void Interface::exibirMenuCliente(Carrinho& carrinho, Catalogo& catalogo, Cliente& cliente) {
     int opcao;
 
     do {
+        // Amanhã eu substituo a linha de baixo por: exibirCabecalhoMenu(cliente);
         imprimirTitulo("MENU CLIENTE");
         std::cout << "1 - Catalogo\n";
         std::cout << "2 - Meu carrinho\n";

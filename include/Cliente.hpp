@@ -37,7 +37,6 @@ private:
 public:
     /**
      * @brief Constrói um Cliente e garante que ele só exista em estado válido.
-     * @throw std::invalid_argument se qualquer dado (inclusive validade matemática do CPF) for inválido.
      */
     Cliente(const std::string& nome,
             const std::string& email,
@@ -45,39 +44,37 @@ public:
             const std::string& cpf,
             const std::string& respostaSeguranca);
 
+    // TODO para amanhã: Descomentar quando a Djulia atualizar a classe Usuario
+    // ~Cliente() override = default;
+
+    /**
+     * @brief Implementação do polimorfismo exigido pelo professor.
+     */
+    // TODO para amanhã: Descomentar para ativar o polimorfismo
+    // void exibirPerfil() const override;
+
     /**
      * @brief Valida os dígitos verificadores do CPF.
-     * @return true se o CPF for matematicamente válido.
      */
     bool validarCpf() const;
 
     /**
      * @brief Valida o número do cartão pelo algoritmo de Luhn.
-     * @param numeroCartao Número do cartão (pode conter traços/espaços).
-     * @return true se passar na validação.
      */
     bool validarCartao(const std::string& numeroCartao) const;
 
     /**
      * @brief Tenta salvar um cartão na lista do cliente.
-     * @param novoCartao Número do cartão.
-     * @param tipo Tipo do cartão.
-     * @return true se salvo; false se inválido no Luhn ou duplicado.
-     * @throw std::invalid_argument se o número for vazio.
      */
     bool salvarCartao(const std::string& novoCartao, TipoCartao tipo);
 
     /**
      * @brief Atualiza o endereço de entrega.
-     * @throw std::invalid_argument se o endereço for vazio ou contiver ponto e vírgula.
      */
     void adicionarEndereco(const std::string& novoEndereco);
 
     /**
      * @brief Salva o cliente no arquivo.
-     * @param nomeArquivo Arquivo destino.
-     * @return true se salvo; false se email já cadastrado.
-     * @throw std::runtime_error se ocorrer erro de arquivo.
      */
     bool cadastrarCliente(const std::string& nomeArquivo) const;
 
